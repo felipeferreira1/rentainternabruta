@@ -6,7 +6,7 @@
 #Definindo diretórios a serem utilizados
 
 getwd()
-setwd("C:\\Users\\User\\Documents\\Renda interna bruta")
+setwd("C:\\Users\\User\\Documents\\GitHub\\rentainternabruta")
 
 #Carregando pacotes que serão utilizados
 library(readxl)
@@ -17,23 +17,14 @@ tabela_ct_1996_2018 = read_excel("dados.xlsx", sheet = "Trimestral_1996-2018 (re
 
 #valores correntes
 arrumar_tabelas = function(df_entrada ,df_saida, qtd_colunas){
-  df_saida = df_entrada[,1:qtd_colunas]
+  df_saida = data.frame(df_entrada[,1], df_entrada[,qtd_colunas])
   colnames(df_saida) = df_saida[1,]
   df_saida = df_saida[-1,]
   df_saida[,-1] = apply(df_saida[,-1],2,function(x)as.numeric(gsub(",",".",x)))
   return(df_saida)
 }
 
-tabela_ca_2000_2017_vcorr = arrumar_tabelas(tabela_ca_2000_2017, tabela_ca_2000_2017_vcorr, 10)
-
-
-
-
-
-tabela_ca_2000_2017_vcorr = tabela_ca_2000_2017[,1:10]
-colnames(tabela_ca_2000_2017_vcorr) = tabela_ca_2000_2017_vcorr[1,]
-tabela_ca_2000_2017_vcorr = tabela_ca_2000_2017_vcorr[-1,]
-tabela_ca_2000_2017_vcorr[,-1] = apply(tabela_ca_2000_2017_vcorr[,-1],2,function(x)as.numeric(gsub(",",".",x)))
+tabela_ca_2000_2017_vcorr = arrumar_tabelas(tabela_ca_2000_2017, tabela_ca_2000_2017_vcorr, 2:10)
 
 separa_colunas = function(data, nome_coluna, df_entrada){
   df_saida = df_entrada[,c(data, nome_coluna)]
@@ -49,16 +40,9 @@ import_a_vcorr = separa_colunas('Período', 'Importação', tabela_ca_2000_2017_vco
 absorv_dom_a_vcorr = separa_colunas('Período', 'Absorção Doméstica', tabela_ca_2000_2017_vcorr)
 
 
-pib_a_vcorr2 = tabela_ca_2000_2017_vcorr[,c('Período', 'PIB')]
-consumo_familias_a_vcorr = tabela_ca_2000_2017_vcorr[,c('Período', 'Consumo das Famílias')]
-consumo_governo_a_vcorr = tabela_ca_2000_2017_vcorr[,c('Período', 'Consumo do Governo')]
-fbkf_a_vcorr = tabela_ca_2000_2017_vcorr[,c('Período', 'Formação Bruta de Capital Fixo')]
-export_a_vcorr = tabela_ca_2000_2017_vcorr[,c('Período', 'Exportação')]
-import_a_vcorr = tabela_ca_2000_2017_vcorr[,c('Período', 'Importação')]
-absorv_dom_a_vcorr = tabela_ca_2000_2017_vcorr[,c('Período', 'Absorção Doméstica')]
-
-
 #Valor constantes
+tabela_ca_2000_2017_vcon = arrumar_tabelas(tabela_ca_2000_2017, tabela_ca_2000_2017_vcon, 11:19)
+
 tabela_ca_2000_2017_vcon = data.frame(tabela_ca_2000_2017[,1], tabela_ca_2000_2017[,11:19])
 colnames(tabela_ca_2000_2017_vcon) = tabela_ca_2000_2017_vcon[1,]
 tabela_ca_2000_2017_vcon = tabela_ca_2000_2017_vcon[-1,]
