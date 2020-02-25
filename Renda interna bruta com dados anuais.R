@@ -11,13 +11,7 @@ setwd("C:\\Users\\User\\Documents\\GitHub\\rentainternabruta")
 #Carregando pacotes que serão utilizados
 library(readxl)
 
-#Carregando arquivo das contas trimestrais
-tabela_ca_2000_2017= read_excel("dados.xlsx", sheet = "Anual_2000-2017 (ref2010)")
-tabela_ct_1996_2018 = read_excel("dados.xlsx", sheet = "Trimestral_1996-2018 (ref2010)")
-tabela_ca_1990_2000 = read_excel("dados.xlsx", sheet = "Anual_1990-2000 (ref1985e2000)")
-tabela_ca_1947_1989 = read_excel("dados.xlsx", sheet = "Anual_1947-1989 (ref1987)")
-
-#valores correntes
+#Funções
 arrumar_tabelas = function(df_entrada ,df_saida, qtd_colunas){
   df_saida = data.frame(df_entrada[,1], df_entrada[,qtd_colunas])
   colnames(df_saida) = df_saida[1,]
@@ -26,12 +20,42 @@ arrumar_tabelas = function(df_entrada ,df_saida, qtd_colunas){
   return(df_saida)
 }
 
-tabela_ca_2000_2017_vcorr = arrumar_tabelas(tabela_ca_2000_2017, tabela_ca_2000_2017_vcorr, 2:10)
-
 separa_colunas = function(data, nome_coluna, df_entrada){
   df_saida = df_entrada[,c(data, nome_coluna)]
   return(df_saida)
 }
+
+#tabela_ca_1990_2000 = read_excel("dados.xlsx", sheet = "Anual_1990-2000 (ref1985e2000)")
+#tabela_ca_1947_1989 = read_excel("dados.xlsx", sheet = "Anual_1947-1989 (ref1987)")
+
+
+######PARTE 1######
+#Carregando arquivo das contas trimestrais 1996-2018 (ref 2010)
+tabela_ct_1996_2018 = read_excel("dados.xlsx", sheet = "Trimestral_1996-2018 (ref2010)")
+
+#Valores correntes
+tabela_ct_1996_2018_vcorr = arrumar_tabelas(tabela_ct_1996_2018, tabela_ct_1996_2018_vcorr, 2:9)
+
+pib_a_vcorr_1996_2018 = separa_colunas('Período', 'PIB', tabela_ct_1996_2018_vcorr)
+consumo_familias_a_vcorr_1996_2018 = separa_colunas('Período', 'Consumo das Famílias', tabela_ct_1996_2018_vcorr)
+consumo_governo_a_vcorr_1996_2018 = separa_colunas('Período', 'Consumo do Governo', tabela_ct_1996_2018_vcorr)
+fbkf_a_vcorr_1996_2018 = separa_colunas('Período', 'Formação Bruta de Capital Fixo', tabela_ct_1996_2018_vcorr)
+export_a_vcorr_1996_2018 = separa_colunas('Período', 'Exportação', tabela_ct_1996_2018_vcorr)
+import_a_vcorr_1996_2018 = separa_colunas('Período', 'Importação', tabela_ct_1996_2018_vcorr)
+var_est_a_vcorr_1996_2018 = separa_colunas('Período', 'Variação de Estoques', tabela_ct_1996_2018_vcorr)
+
+#Variação real anual
+
+
+
+
+
+######PARTE 2######
+#Carregando dados anuais 2000-2017 (ref 2010)
+tabela_ca_2000_2017= read_excel("dados.xlsx", sheet = "Anual_2000-2017 (ref2010)")
+
+#valores correntes
+tabela_ca_2000_2017_vcorr = arrumar_tabelas(tabela_ca_2000_2017, tabela_ca_2000_2017_vcorr, 2:10)
 
 pib_a_vcorr_2000_2017 = separa_colunas('Período', 'PIB', tabela_ca_2000_2017_vcorr)
 consumo_familias_a_vcorr_2000_2017 = separa_colunas('Período', 'Consumo das Famílias', tabela_ca_2000_2017_vcorr)
@@ -42,7 +66,7 @@ import_a_vcorr_2000_2017 = separa_colunas('Período', 'Importação', tabela_ca_200
 absorv_dom_a_vcorr_2000_2017 = separa_colunas('Período', 'Absorção Doméstica', tabela_ca_2000_2017_vcorr)
 
 
-#Valor constantes
+#Valores constantes
 tabela_ca_2000_2017_vcon = arrumar_tabelas(tabela_ca_2000_2017, tabela_ca_2000_2017_vcon, 11:19)
 
 pib_a_vcon_2000_2017 = separa_colunas('Período', 'PIB = PIB a preços do ano anterior', tabela_ca_2000_2017_vcon)
