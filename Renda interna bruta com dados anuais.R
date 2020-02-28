@@ -30,8 +30,22 @@ var_nominal = function(df_entrada){
   df_saida[1,2] = NA
   for (i in 2:dim(df_entrada)[1]){
     df_saida[i,2] = df_entrada[i,2]/df_entrada[(i-1),2]
-    return(df_saida)
     }
+  return(df_saida)
+}
+
+deflatores_div_cemeum = function(numerador, denominador, nome_data, nome_dados){
+  df_saida = numerador[,-1] / (denominador[,-1]/100+1)
+  df_saida = data.frame(numerador[,1], df_saida)
+  colnames(df_saida) = c(nome_data, nome_dados)
+  return(df_saida)
+}
+
+deflatores_div = function(numerador, denominador, nome_data, nome_dados){
+  df_saida = numerador[,-1] / denominador[,-1]
+  df_saida = data.frame(numerador[,1], df_saida)
+  colnames(df_saida) = c(nome_data, nome_dados)
+  return(df_saida)
 }
 
 #tabela_ca_1990_2000 = read_excel("dados.xlsx", sheet = "Anual_1990-2000 (ref1985e2000)")
@@ -54,7 +68,7 @@ import_a_vcorr_1996_2018 = separa_colunas('Período', 'Importação', tabela_ct_199
 var_est_a_vcorr_1996_2018 = separa_colunas('Período', 'Variação de Estoques', tabela_ct_1996_2018_vcorr)
 
 #Variação real anual
-tabela_ct_1996_2018_vra = arrumar_tabelas(tabela_ct_1996_2018, tabela_ct_1996_2018_vcorr, 10:15)
+tabela_ct_1996_2018_vra = arrumar_tabelas(tabela_ct_1996_2018, 10:15)
 
 pib_a_vra_1996_2018 = separa_colunas('Período', 'PIB', tabela_ct_1996_2018_vra)
 consumo_familias_a_vra_1996_2018 = separa_colunas('Período', 'Consumo das Famílias', tabela_ct_1996_2018_vra)
@@ -63,9 +77,22 @@ fbkf_a_vra_1996_2018 = separa_colunas('Período', 'Formação Bruta de Capital Fixo
 export_a_vra_1996_2018 = separa_colunas('Período', 'Exportação', tabela_ct_1996_2018_vra)
 import_a_vra_1996_2018 = separa_colunas('Período', 'Importação', tabela_ct_1996_2018_vra)
 
-
 #Variação nominal anual
-pib_a_vna_1996_2018 = 
+pib_a_vna_1996_2018 = var_nominal(pib_a_vcorr_1996_2018)
+consumo_familias_a_vna_1996_2018 = var_nominal(consumo_familias_a_vcorr_1996_2018)
+consumo_governo_a_vna_1996_2018 = var_nominal(consumo_governo_a_vcorr_1996_2018)
+fbkf_a_vna_1996_2018 = var_nominal(fbkf_a_vcorr_1996_2018)
+export_a_vna_1996_2018 = var_nominal(export_a_vcorr_1996_2018)
+import_a_vna_1996_2018 = var_nominal(import_a_vcorr_1996_2018)
+
+#Calculando deflatores
+px_vn_1996_2018a = deflatores_div_cemeum(export_a_vna_1996_2018, export_a_vra_1996_2018, "Período", "Px")
+pm_vn_1996_2018 = deflatores_div_cemeum(import_a_vna_1996_2018, import_a_vra_1996_2018, "Período", "Pm")
+pc_vn_1996_2018 = deflatores_div_cemeum()
+
+
+
+
 
 
 ######PARTE 2######
@@ -99,7 +126,7 @@ absorv_dom_a_vcon_2000_2017 = separa_colunas('Período', 'Absorção Doméstica', ta
 
 #NOMEAR COLUNAS!!!
 
-
+#px_pca = deflatores_div(export_a_vcorr_2000_2017, export_a_vcon_2000_2017, "Período", "Px")
 px_pc = export_a_vcorr_2000_2017[,-1] / export_a_vcon_2000_2017[,-1]
 px_pc = data.frame(export_a_vcorr_2000_2017[,1], px_pc)
 colnames(px_pc) = c('Período', 'Px')
