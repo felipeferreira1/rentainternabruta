@@ -69,11 +69,52 @@ deflatores_mult = function(numerador, denominador, nome_data, nome_dados){
   return(df_saida)
 }
 
-#tabela_ca_1990_2000 = read_excel("dados.xlsx", sheet = "Anual_1990-2000 (ref1985e2000)")
 #tabela_ca_1947_1989 = read_excel("dados.xlsx", sheet = "Anual_1947-1989 (ref1987)")
 
+######PARTE 2######
+#Carregando arquivo das contas anuais 1990-2000 (ref1985e2000)
+tabela_ca_1990_2000 = read_excel("dados.xlsx", sheet = "Anual_1990-2000 (ref1985e2000)")
 
-######PARTE 1######
+#valores correntes
+tabela_ca_1990_2000_vcorr = arrumar_tabelas(tabela_ca_1990_2000, 2:10)
+
+pib_a_vcorr_1990_2000 = separar_colunas('Período', 'PIB', tabela_ca_1990_2000_vcorr)
+consumo_familias_a_vcorr_1990_2000 = separar_colunas('Período', 'Consumo das Famílias', tabela_ca_1990_2000_vcorr)
+consumo_governo_a_vcorr_1990_2000 = separar_colunas('Período', 'Consumo do Governo', tabela_ca_1990_2000_vcorr)
+fbkf_a_vcorr_1990_2000 = separar_colunas('Período', 'Formação Bruta de Capital Fixo', tabela_ca_1990_2000_vcorr)
+var_est_a_vcorr_1996_2018 = separar_colunas('Período', 'Variação de Estoque', tabela_ca_1990_2000_vcorr)
+export_a_vcorr_1990_2000 = separar_colunas('Período', 'Exportação', tabela_ca_1990_2000_vcorr)
+import_a_vcorr_1990_2000 = separar_colunas('Período', 'Importação', tabela_ca_1990_2000_vcorr)
+absorv_dom_a_vcorr_1990_2000 = separar_colunas('Período', 'Absorção Doméstica', tabela_ca_1990_2000_vcorr)
+fbk_a_vcorr_1990_2000 = separar_colunas('Período', 'Formação Bruta de Capital', tabela_ca_1990_2000_vcorr)
+
+
+#Variação real anual
+tabela_ca_1990_2000_vra = arrumar_tabelas(tabela_ca_1990_2000, 11:17)
+
+pib_a_vra_1990_2000 = separar_colunas('Período', 'PIB', tabela_ca_1990_2000_vra)
+consumo_familias_a_vra_1990_2000 = separar_colunas('Período', 'Consumo das Famílias', tabela_ca_1990_2000_vra)
+consumo_governo_a_vra_1990_2000 = separar_colunas('Período', 'Consumo do Governo', tabela_ca_1990_2000_vra)
+fbkf_a_vra_1990_2000 = separar_colunas('Período', 'Formação Bruta de Capital Fixo', tabela_ca_1990_2000_vra)
+fbk_a_vra_1990_2000 = separar_colunas('Período', 'Formação Bruta de Capital', tabela_ca_1990_2000_vra)
+export_a_vra_1990_2000 = separar_colunas('Período', 'Exportação', tabela_ca_1990_2000_vra)
+import_a_vra_1990_2000 = separar_colunas('Período', 'Importação', tabela_ca_1990_2000_vra)
+
+
+#Variação nominal anual
+pib_a_vna_1990_2000 = var_nominal(pib_a_vcorr_1990_2000)
+consumo_familias_a_vna_1990_2000 = var_nominal(consumo_familias_a_vcorr_1990_2000)
+consumo_governo_a_vna_1990_2000 = var_nominal(consumo_governo_a_vcorr_1990_2000)
+fbkf_a_vna_1990_2000 = var_nominal(fbkf_a_vcorr_1990_2000)
+fbk_a_vna_1990_2000 = var_nominal(fbk_a_vcorr_1990_2000)
+export_a_vna_1990_2000 = var_nominal(export_a_vcorr_1990_2000)
+import_a_vna_1990_2000 = var_nominal(import_a_vcorr_1990_2000)
+
+###DEFLATORES
+
+
+
+######PARTE 3######
 #Carregando arquivo das contas trimestrais 1996-2018 (ref 2010)
 tabela_ct_1996_2018 = read_excel("dados.xlsx", sheet = "Trimestral_1996-2018 (ref2010)")
 
@@ -87,7 +128,6 @@ fbkf_a_vcorr_1996_2018 = separar_colunas('Período', 'Formação Bruta de Capital F
 export_a_vcorr_1996_2018 = separar_colunas('Período', 'Exportação', tabela_ct_1996_2018_vcorr)
 import_a_vcorr_1996_2018 = separar_colunas('Período', 'Importação', tabela_ct_1996_2018_vcorr)
 absorv_dom_a_vcorr_1996_2018 = separar_colunas('Período', 'Absorção Doméstica', tabela_ct_1996_2018_vcorr)
-
 var_est_a_vcorr_1996_2018 = separar_colunas('Período', 'Variação de Estoques', tabela_ct_1996_2018_vcorr)
 
 
@@ -186,9 +226,7 @@ ind_rib_pib_vn_1996_2018 = data.frame(ind_rib_vn_1996_2018[,1], ind_rib_pib_vn_1
 colnames(ind_rib_pib_vn_1996_2018) = c("Período", "Índice RIB/PIB(Pa)")
 
 
-
-
-######PARTE 2######
+######PARTE 4######
 #Carregando dados anuais 2000-2017 (ref 2010)
 tabela_ca_2000_2017= read_excel("dados.xlsx", sheet = "Anual_2000-2017 (ref2010)")
 
