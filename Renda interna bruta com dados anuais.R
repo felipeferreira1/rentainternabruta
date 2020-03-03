@@ -1,6 +1,6 @@
 #Rotina para calcular a renda interna bruta
 #Feito por: Felipe Simplício Ferreira
-#última atualização: 06/12/2019
+#última atualização: 02/03/2020
 
 
 #Definindo diretórios a serem utilizados
@@ -110,8 +110,83 @@ fbk_a_vna_1990_2000 = var_nominal(fbk_a_vcorr_1990_2000)
 export_a_vna_1990_2000 = var_nominal(export_a_vcorr_1990_2000)
 import_a_vna_1990_2000 = var_nominal(import_a_vcorr_1990_2000)
 
-###DEFLATORES
+#Calculando deflatores
+px_vn_1990_2000 = deflatores_div_cem_mais_um(export_a_vna_1990_2000, export_a_vra_1990_2000, "Período", "Px")
+pm_vn_1990_2000 = deflatores_div_cem_mais_um(import_a_vna_1990_2000, import_a_vra_1990_2000, "Período", "Pm")
+pc_vn_1990_2000 = deflatores_div_cem_mais_um(consumo_familias_a_vna_1990_2000, consumo_familias_a_vra_1990_2000, "Período", "Pc")
+pg_vn_1990_2000 = deflatores_div_cem_mais_um(consumo_governo_a_vna_1990_2000, consumo_governo_a_vra_1990_2000, "Período", "Pg")
+pfbkf_vn_1990_2000 = deflatores_div_cem_mais_um(fbkf_a_vna_1990_2000, fbkf_a_vra_1990_2000, "Período", "Pfbkf")
+pfbk_vn_1990_2000 = deflatores_div_cem_mais_um(fbk_a_vna_1990_2000, fbk_a_vra_1990_2000, "Período", "Pfbk")
+pesoc_vn_1990_2000 = deflatores_div(consumo_familias_a_vcorr_1990_2000, absorv_dom_a_vcorr_1990_2000, "Período", "Peso C")
+pesog_vn_1990_2000 = deflatores_div(consumo_governo_a_vcorr_1990_2000, absorv_dom_a_vcorr_1990_2000, "Período", "Peso G")
+pesofbkf_vn_1990_2000 = deflatores_div(fbkf_a_vcorr_1990_2000, absorv_dom_a_vcorr_1990_2000, "Período", "Peso Fbkf")
+pesofbk_vn_1990_2000 = deflatores_div(fbk_a_vcorr_1990_2000, absorv_dom_a_vcorr_1990_2000, "Período", "Peso Fbk")
 
+pa_vn_1990_2000 = 1/((pesoc_vn_1990_2000[,-1])/pc_vn_1990_2000[,-1] + (pesog_vn_1990_2000[,-1]/pg_vn_1990_2000[,-1]) + (pesofbk_vn_1990_2000[,-1]/pfbk_vn_1990_2000[,-1]))
+pa_vn_1990_2000 = data.frame(pesoc_vn_1990_2000[,1], pa_vn_1990_2000)
+colnames(pa_vn_1990_2000) = c("Período", "Pa")
+
+p_pib_vn_1990_2000 = deflatores_div_cem_mais_um(pib_a_vna_1990_2000, pib_a_vra_1990_2000, "Período", "Ppib")
+
+#Cálculo Pa calculado
+saa_vn_1990_2000 = deflatores_div(absorv_dom_a_vcorr_1990_2000, pib_a_vcorr_1990_2000, "Período", "Saa")
+p_pib_saa_vn_1990_2000 = deflatores_mult(p_pib_vn_1990_2000, saa_vn_1990_2000, "Período", "Ppib * Saa")
+sx_vn_1990_2000 = deflatores_div(export_a_vcorr_1990_2000, pib_a_vcorr_1990_2000, "Período", "Sx")
+sm_vn_1990_2000 = deflatores_div(import_a_vcorr_1990_2000, pib_a_vcorr_1990_2000, "Período", "Sm")
+
+sxpx_smpx_vn_1990_2000 = (sx_vn_1990_2000[,-1]/px_vn_1990_2000[,-1]) - (sm_vn_1990_2000[,-1]/pm_vn_1990_2000[,-1])
+sxpx_smpx_vn_1990_2000 = data.frame(sx_vn_1990_2000[,1] , sxpx_smpx_vn_1990_2000)
+colnames(sxpx_smpx_vn_1990_2000) = c("Período", " (Sx/Px - Sm/Pm)")
+
+pa_calc_vn_1990_2000 = p_pib_saa_vn_1990_2000[,-1] / (1 - p_pib_vn_1990_2000[,-1] * sxpx_smpx_vn_1990_2000[,-1])
+pa_calc_vn_1990_2000 = data.frame(p_pib_saa_vn_1990_2000[,1], pa_calc_vn_1990_2000)
+colnames(pa_calc_vn_1990_2000) = c("Período", "Pa calculado")
+
+p_tradables_mgeo_vn_1990_2000 = data.frame(px_vn_1990_2000$Período ,sqrt(px_vn_1990_2000$Px * pm_vn_1990_2000$Pm))
+colnames(p_tradables_mgeo_vn_1990_2000) = c("Período", "P_tradables (m.geo)")
+
+p_relativos_vn_1990_2000 = deflatores_div(p_tradables_mgeo_vn_1990_2000, pa_vn_1990_2000, "Período", "Prelativos")
+prt_pa_calc_vn_1990_2000 = deflatores_div(p_tradables_mgeo_vn_1990_2000, pa_calc_vn_1990_2000, "Período", "Prt com Pa calculado")
+
+pib_p_ano_anterior_1990_2000 = pib_a_vcorr_1990_2000
+pib_p_ano_anterior_1990_2000[1,2] = NA
+for (i in 2:dim(pib_a_vcorr_1990_2000)[1]){
+  pib_p_ano_anterior_1990_2000[i,2] = pib_a_vcorr_1990_2000[(i-1),2] * (pib_a_vra_1990_2000[i,2]/100+1)
+}
+
+###VERIFICAR###
+
+tt_vn_1990_2000 = deflatores_div(px_vn_1990_2000, pm_vn_1990_2000, "Período", "Termos de troca")
+x_m_vn_1990_2000 = deflatores_sub(export_a_vcorr_1990_2000, import_a_vcorr_1990_2000, "Período", "(X-M)")
+x_m_pa_vn_1990_2000 = deflatores_div(x_m_vn_1990_2000, pa_vn_1990_2000, "Período", "(X-M)/Pa")
+x_px_vn_1990_2000 = deflatores_div(export_a_vcorr_1990_2000, px_vn_1990_2000, "Período", "X/Px")
+m_pm_vn_1990_2000 = deflatores_div(import_a_vcorr_1990_2000, pm_vn_1990_2000, "Período", "M/Pm")
+xpx_mpm_vn_1990_2000 = deflatores_sub(x_px_vn_1990_2000, m_pm_vn_1990_2000, "Período", "X/Px-M/Pm")
+gc_vn_1990_2000 = deflatores_sub(x_m_pa_vn_1990_2000, xpx_mpm_vn_1990_2000, "Período", "GC")
+gc_pib_vn_1990_2000 = deflatores_div(gc_vn_1990_2000, pib_p_ano_anterior_1990_2000, "Período", "GC/PIB")
+rib_p_ano_anterior_vn_1990_2000 = deflatores_soma(gc_vn_1990_2000, pib_p_ano_anterior_1990_2000, "Período", "RIB a preços do ano anterior")
+
+var_rib_1_vn_1990_2000 = pib_a_vcorr_1990_2000
+var_rib_1_vn_1990_2000[1,2] = NA
+for (i in 2:dim(pib_a_vcorr_1990_2000)[1]){
+  var_rib_1_vn_1990_2000[i,2] = rib_p_ano_anterior_vn_1990_2000[i,-1] / pib_a_vcorr_1990_2000[(i-1),-1]
+}
+
+ind_pib_vn_1990_2000 = pib_a_vra_1990_2000
+ind_pib_vn_1990_2000[1,2] = 100
+for (i in 2:dim(pib_a_vra_1990_2000)[1]){
+  ind_pib_vn_1990_2000[i,2] = ind_pib_vn_1990_2000[i-1,2] * (pib_a_vra_1990_2000[i,2] / 100 + 1)
+}
+
+ind_rib_vn_1990_2000 = var_rib_1_vn_1990_2000
+ind_rib_vn_1990_2000[1,2] = 100
+for (i in 2:dim(var_rib_1_vn_1990_2000)[1]){
+  ind_rib_vn_1990_2000[i,2] = ind_rib_vn_1990_2000[i-1,2]*var_rib_1_vn_1990_2000[i,2]
+}
+
+ind_rib_pib_vn_1990_2000 = (ind_rib_vn_1990_2000[,-1] / ind_pib_vn_1990_2000[,-1])*100
+ind_rib_pib_vn_1990_2000 = data.frame(ind_rib_vn_1990_2000[,1], ind_rib_pib_vn_1990_2000)
+colnames(ind_rib_pib_vn_1990_2000) = c("Período", "Índice RIB/PIB(Pa)")
 
 
 ######PARTE 3######
@@ -169,7 +244,7 @@ p_pib_vn_1996_2018 = deflatores_div_cem_mais_um(pib_a_vna_1996_2018, pib_a_vra_1
 
 #Cálculo Pa calculado
 saa_vn_1996_2018 = deflatores_div(absorv_dom_a_vcorr_1996_2018, pib_a_vcorr_1996_2018, "Período", "Saa")
-p_pib_saa_vn_1996_2018 = deflatores_mult(p_pib_vn_1996_2018, saa_pc_vn_1996_2018, "Período", "Ppib * Saa")
+p_pib_saa_vn_1996_2018 = deflatores_mult(p_pib_vn_1996_2018, saa_vn_1996_2018, "Período", "Ppib * Saa")
 sx_vn_1996_2018 = deflatores_div(export_a_vcorr_1996_2018, pib_a_vcorr_1996_2018, "Período", "Sx")
 sm_vn_1996_2018 = deflatores_div(import_a_vcorr_1996_2018, pib_a_vcorr_1996_2018, "Período", "Sm")
 
