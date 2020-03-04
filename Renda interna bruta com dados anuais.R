@@ -69,7 +69,34 @@ deflatores_mult = function(numerador, denominador, nome_data, nome_dados){
   return(df_saida)
 }
 
-#tabela_ca_1947_1989 = read_excel("dados.xlsx", sheet = "Anual_1947-1989 (ref1987)")
+######PARTE 1######
+#Carregando arquivo das contas anuais 1947-1989 (ref1987)
+tabela_ca_1947_1989 = read_excel("dados.xlsx", sheet = "Anual_1947-1989 (ref1987)")
+tabela_ca_1947_1989 = arrumar_tabelas(tabela_ca_1947_1989, 2:62)
+
+#Importando deflatores
+px_1947_1989 = separar_colunas('Período', 'Px_preço', tabela_ca_1947_1989)
+pm_1947_1989 = separar_colunas('Período', 'Pm_preço', tabela_ca_1947_1989)
+pa_1947_1989 = separar_colunas('Período', 'Pa - IPC-RJ Média', tabela_ca_1947_1989)
+p_pib_1947_1989 = separar_colunas('Período', 'Ppib', tabela_ca_1947_1989)
+pa_calc_1947_1989 = separar_colunas('Período', 'Pa calculado', tabela_ca_1947_1989)
+p_tradables_mgeo_1947_1989 = separar_colunas('Período', 'P_tradables (m.geo)', tabela_ca_1947_1989)
+p_relativos_1947_1989 = separar_colunas('Período', 'Preços relativos (P_tradables/P_ñtradables)', tabela_ca_1947_1989)
+prt_pa_calc_1947_1989 = separar_colunas('Período', 'Prt com Pa calculado', tabela_ca_1947_1989)
+pib_p_ano_anterior_1947_1989 = separar_colunas('Período', 'PIB a preços do ano anterior', tabela_ca_1947_1989)
+tt_1947_1989 = separar_colunas('Período', 'Termos de Troca (Px/Pm)', tabela_ca_1947_1989)
+x_m_1947_1989 = separar_colunas('Período', '(X-M)', tabela_ca_1947_1989)
+x_m_pa_1947_1989 = separar_colunas('Período', '(X-M)/Pa', tabela_ca_1947_1989)
+x_px_1947_1989 = separar_colunas('Período', 'X/Px_preço', tabela_ca_1947_1989)
+m_pm_1947_1989 = separar_colunas('Período', 'M/Pm_preço', tabela_ca_1947_1989)
+xpx_mpm_1947_1989 = separar_colunas('Período', 'X/Px-M/Pm', tabela_ca_1947_1989)
+gc_1947_1989 = separar_colunas('Período', 'GC', tabela_ca_1947_1989)
+gc_pib_1947_1989 = separar_colunas('Período', 'GC/PIB', tabela_ca_1947_1989)
+rib_p_ano_anterior_1947_1989 = separar_colunas('Período', 'RIB a preços do ano anterior', tabela_ca_1947_1989)
+ind_pib_1947_1989 = separar_colunas('Período', 'Índice PIB', tabela_ca_1947_1989)
+ind_rib_1947_1989 = separar_colunas('Período', 'Índice RIB Pa', tabela_ca_1947_1989)
+ind_rib_pib_1947_1989 = separar_colunas('Período', 'Índice RIB/PIB(Pa)', tabela_ca_1947_1989)
+
 
 ######PARTE 2######
 #Carregando arquivo das contas anuais 1990-2000 (ref1985e2000)
@@ -153,8 +180,6 @@ pib_p_ano_anterior_1990_2000[1,2] = NA
 for (i in 2:dim(pib_a_vcorr_1990_2000)[1]){
   pib_p_ano_anterior_1990_2000[i,2] = pib_a_vcorr_1990_2000[(i-1),2] * (pib_a_vra_1990_2000[i,2]/100+1)
 }
-
-###VERIFICAR###
 
 tt_vn_1990_2000 = deflatores_div(px_vn_1990_2000, pm_vn_1990_2000, "Período", "Termos de troca")
 x_m_vn_1990_2000 = deflatores_sub(export_a_vcorr_1990_2000, import_a_vcorr_1990_2000, "Período", "(X-M)")
