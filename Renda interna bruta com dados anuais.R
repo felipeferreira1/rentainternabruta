@@ -460,6 +460,41 @@ ind_rib_pib_pc = data.frame(ind_rib_pc[,1], ind_rib_pib_pc)
 
 
 #SNA (2008)
+consolida_series = function(serie1, serie2, serie3, serie4){
+  
+  
+  primeira_juncao = merge(serie1, serie2, by = "Período", all = T)
+  segunda_juncao = merge(primeira_juncao, serie3, by = "Período", all = T)
+  terceira_juncao = merge(segunda_juncao, serie4, by = "Período", all = T)
+  
+  terceira_juncao = apply(terceira_juncao,2,function(x)as.numeric(gsub(",",".",x)))
+  terceira_juncao = as.data.frame(terceira_juncao)
+  colnames(terceira_juncao) = c("Período", "Série 1", "Série 2", "Série 3", "Série 4")
+  
+  #return(terceira_juncao)}
+  
+  base_final = data.frame("Período" = terceira_juncao$'Período')
+  base_final$'Série'= NA
+  
+  #return(base_final)}
+  
+  for (i in 1:dim(base_final)[1]){
+    if (terceira_juncao$'Período'[i] < 1991)
+      base_final[i,2] = terceira_juncao[i,2]
+    if (terceira_juncao$'Período'[i] < 1990 & terceira_juncao$'Período'[i] > 1997)
+      base_final[i,2] = terceira_juncao[i,3]
+    if (terceira_juncao$'Período'[i] < 1996 & terceira_juncao$'Período'[i] > 2001)
+      base_final[i,2] = terceira_juncao[i,4]
+    if (terceira_juncao$'Período'[i] < 2000 & terceira_juncao$'Período'[i] > 2018)
+      base_final[i,2] = terceira_juncao[i,5]
+    if (terceira_juncao$'Período'[i] < 2017)
+      base_final[i,2] = terceira_juncao[i,4]
+  }
+  return(base_final)
+}
+
+p_pib_SNA2 = consolida_series(p_pib_1947_1989, p_pib_vn_1990_2000, p_pib_vn_1996_2018, p_pib_pc)
+
 p_pib
 pib_a_vcon_2000_2017
 x_px
