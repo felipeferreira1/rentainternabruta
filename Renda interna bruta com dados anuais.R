@@ -353,147 +353,120 @@ export_a_vcon_2000_2017 = separar_colunas('Período', 'Exportação', tabela_ca_200
 import_a_vcon_2000_2017 = separar_colunas('Período', 'Importação', tabela_ca_2000_2017_vcon)
 absorv_dom_a_vcon_2000_2017 = separar_colunas('Período', 'Absorção Doméstica', tabela_ca_2000_2017_vcon)
 
+
 #Deflatores com valores constantes
-
-#NOMEAR COLUNAS!!!
-
-#px_pca = deflatores_div(export_a_vcorr_2000_2017, export_a_vcon_2000_2017, "Período", "Px")
-px_pc = export_a_vcorr_2000_2017[,-1] / export_a_vcon_2000_2017[,-1]
-px_pc = data.frame(export_a_vcorr_2000_2017[,1], px_pc)
-colnames(px_pc) = c('Período', 'Px')
-
-pm_pc = import_a_vcorr_2000_2017[,-1] / import_a_vcon_2000_2017[,-1]
-pm_pc = data.frame(import_a_vcorr_2000_2017[,1], pm_pc)
-colnames(pm_pc) = c('Período', 'Pm')
-
-pa_pc = absorv_dom_a_vcorr_2000_2017[,-1] / absorv_dom_a_vcon_2000_2017[,-1]
-pa_pc = data.frame(absorv_dom_a_vcorr_2000_2017[,1], pa_pc)
-colnames(pa_pc) = c('Período', 'Pa')
-
-p_pib_pc = pib_a_vcorr_2000_2017[,-1] / pib_a_vcon_2000_2017 [,-1]
-p_pib_pc = data.frame(pib_a_vcorr_2000_2017[,1], p_pib_pc)
-colnames(p_pib_pc) = c('Período', 'Ppib')
+px_pc_2000_2017 = deflatores_div(export_a_vcorr_2000_2017, export_a_vcon_2000_2017, "Período", "Px")
+pm_pc_2000_2017 = deflatores_div(import_a_vcorr_2000_2017, import_a_vcon_2000_2017, "Período", "Pm")
+pa_pc_2000_2017 = deflatores_div(absorv_dom_a_vcorr_2000_2017, absorv_dom_a_vcon_2000_2017, "Período", "Pa")
+p_pib_pc_2000_2017 = deflatores_div(pib_a_vcorr_2000_2017, pib_a_vcon_2000_2017, "Período", "Ppib")
 
 #Cálculo Pa calculado
-saa_pc = absorv_dom_a_vcorr_2000_2017[,-1] / pib_a_vcorr_2000_2017[,-1]
-saa_pc = data.frame(absorv_dom_a_vcorr_2000_2017[,1], saa_pc)
+saa_pc_2000_2017 = deflatores_div(absorv_dom_a_vcorr_2000_2017, pib_a_vcorr_2000_2017, "Período", "Saa")
+p_pib_saa_pc_2000_2017 = deflatores_mult(p_pib_pc_2000_2017, saa_pc_2000_2017, "Período", "Ppib * Saa")
+sx_pc_2000_2017 = deflatores_div(export_a_vcorr_2000_2017, pib_a_vcorr_2000_2017, "Período", "Sx")
 
-p_pib_saa_pc = p_pib_pc[,-1] * saa_pc[,-1]
-p_pib_saa_pc = data.frame(p_pib_pc[,1], p_pib_saa_pc)
+sm_pc_2000_2017 = (import_a_vcorr_2000_2017[,-1] / pib_a_vcorr_2000_2017[,-1])*-1 #Precisa fazer ajuste nos valores negativos
+sm_pc_2000_2017 = data.frame(import_a_vcorr_2000_2017[,1], sm_pc_2000_2017)
+colnames(sm_pc_2000_2017) = c("Período", "Sm")
 
-sx_pc = export_a_vcorr_2000_2017[,-1] / pib_a_vcorr_2000_2017[,-1]
-sx_pc = data.frame(export_a_vcorr_2000_2017[,1], sx_pc)
+sxpx_smpx_pc_2000_2017 = (sx_pc_2000_2017[,-1]/px_pc_2000_2017[,-1]) - (sm_pc_2000_2017[,-1]/pm_pc_2000_2017[,-1])
+sxpx_smpx_pc_2000_2017 = data.frame(sx_pc_2000_2017[,1] , sxpx_smpx_pc_2000_2017)
+colnames(sxpx_smpx_pc_2000_2017) = c("Período", " (Sx/Px - Sm/Pm)")
 
-sm_pc = (import_a_vcorr_2000_2017[,-1] / pib_a_vcorr_2000_2017[,-1])*-1
-sm_pc = data.frame(import_a_vcorr_2000_2017[,1], sm_pc)
+pa_calc_pc_2000_2017 = p_pib_saa_pc_2000_2017[,-1] / (1 - p_pib_pc_2000_2017[,-1] * sxpx_smpx_pc_2000_2017[,-1])
+pa_calc_pc_2000_2017 = data.frame(p_pib_saa_pc_2000_2017[,1], pa_calc_pc_2000_2017)
+colnames(pa_calc_pc_2000_2017) = c("Período", "Pa calculado")
 
-sxpx_smpx_pc = (sx_pc[,-1]/px_pc[,-1]) - (sm_pc[,-1]/pm_pc[,-1])
-sxpx_smpx_pc = data.frame(sx_pc[,1] , sxpx_smpx_pc)
+p_tradables_mgeo_pc_2000_2017 = data.frame(px_pc_2000_2017$Período ,sqrt(px_pc_2000_2017$Px * pm_pc_2000_2017$Pm))
+colnames(p_tradables_mgeo_pc_2000_2017) = c("Período", "P_tradables (m.geo)")
 
-pa_calc_pc = p_pib_saa_pc[,-1] / (1 - p_pib_pc[,-1] * sxpx_smpx_pc[,-1])
-pa_calc_pc = data.frame(p_pib_saa_pc[,1], pa_calc_pc)
-colnames(pa_calc_pc) = c("Período", "Pa calculado")
+p_relativos_pc_2000_2017 = deflatores_div(p_tradables_mgeo_pc_2000_2017, pa_pc_2000_2017, "Período", "Prelativos")
+prt_pa_calc_pc_2000_2017 = deflatores_div(p_tradables_mgeo_pc_2000_2017, pa_calc_pc_2000_2017, "Período", "Prt com Pa calculado")
 
-p_tradables_mgeo_pc = data.frame(px_pc$Período ,sqrt(px_pc$Px * pm_pc$Pm))
-colnames(p_tradables_mgeo_pc) = c("Período", "P_tradables (m.geo)")
-
-p_relativos_pc = p_tradables_mgeo_pc[,-1] / pa_pc[,-1]
-p_relativos_pc = data.frame(px_pc[,1], p_relativos_pc)
-
-prt_pa_calc_pc = p_tradables_mgeo_pc[,-1] / pa_calc_pc[,-1]
-prt_pa_calc_pc = data.frame(p_tradables_mgeo_pc[,1] , prt_pa_calc_pc)
-
-var_pib_1_pc = pib_a_vcorr_2000_2017
+var_pib_1_pc_2000_2017 = pib_a_vcorr_2000_2017
 for (i in 2:dim(pib_a_vcorr_2000_2017)[1]){
-  var_pib_1_pc[i,2] = pib_a_vcon_2000_2017[i,-1] / pib_a_vcorr_2000_2017[i-1,-1]
+  var_pib_1_pc_2000_2017[i,2] = pib_a_vcon_2000_2017[i,-1] / pib_a_vcorr_2000_2017[i-1,-1]
 }
 
-tt_pc = px_pc[,-1] / pm_pc[,-1]
-tt_pc = data.frame(px_pc[,1], tt_pc)
+tt_pc_2000_2017 = deflatores_div(px_pc_2000_2017, pm_pc_2000_2017, "Período", "Termos de troca")
+x_m_pc_2000_2017 = deflatores_soma(export_a_vcorr_2000_2017, import_a_vcorr_2000_2017, "Período", "(X-M)")
+x_m_pa_pc_2000_2017 = deflatores_div(x_m_pc_2000_2017, pa_pc_2000_2017, "Período", "(X-M)/Pa")
+x_px_pc_2000_2017 = deflatores_div(export_a_vcorr_2000_2017, px_pc_2000_2017, "Período", "X/Px")
 
-x_m_pc = export_a_vcorr_2000_2017[,-1] + import_a_vcorr_2000_2017[,-1]
-x_m_pc = data.frame(export_a_vcorr_2000_2017[,1] , x_m_pc)
+m_pm_pc_2000_2017 = -import_a_vcorr_2000_2017[,-1] / pm_pc_2000_2017[,-1]
+m_pm_pc_2000_2017 = data.frame(import_a_vcorr_2000_2017[,1], m_pm_pc_2000_2017)
+colnames(m_pm_pc_2000_2017) = c("Período", "M/Pm")
 
-x_m_pa_pc = x_m_pc[,-1] / pa_pc[,-1]
-x_m_pa_pc = data.frame(x_m_pc[,1], x_m_pa_pc)
+xpx_mpm_pc_2000_2017 = deflatores_sub(x_px_pc_2000_2017, m_pm_pc_2000_2017, "Período", "X/Px-M/Pm")
+gc_pc_2000_2017 = deflatores_sub(x_m_pa_pc_2000_2017, xpx_mpm_pc_2000_2017, "Período", "GC")
+gc_pib_pc_2000_2017 = deflatores_div(gc_pc_2000_2017, pib_a_vcon_2000_2017, "Período", "GC/PIB")
+rib_p_ano_anterior_pc_2000_2017 = deflatores_soma(gc_pc_2000_2017, pib_a_vcon_2000_2017, "Período", "RIB a preços do ano anterior")
 
-x_px_pc = export_a_vcorr_2000_2017[,-1] / px_pc[,-1]
-x_px_pc = data.frame(export_a_vcorr_2000_2017[,1], x_px_pc)
-
-m_pm_pc = -import_a_vcorr_2000_2017[,-1] / pm_pc[,-1]
-m_pm_pc = data.frame(import_a_vcorr_2000_2017[,1], m_pm_pc)
-
-xpx_mpm_pc = x_px_pc[,-1] - m_pm_pc[,-1]
-xpx_mpm_pc = data.frame(x_px_pc[,1], xpx_mpm_pc)
-
-gc_pc = x_m_pa_pc[,-1] - xpx_mpm_pc[,-1]
-gc_pc = data.frame(x_m_pa_pc[,1], gc_pc)
-
-gc_pib_pc = gc_pc[,-1] / pib_a_vcon_2000_2017[,-1]
-gc_pib_pc = data.frame(gc_pc[,1], gc_pib_pc)
-
-rib_p_anoanterior_pc = gc_pc[,-1] + pib_a_vcon_2000_2017[,-1]
-rib_p_anoanterior_pc = data.frame(gc_pc[,1], rib_p_anoanterior_pc)
-
-var_rib_1_pc = pib_a_vcorr_2000_2017
+var_rib_1_pc_2000_2017 = pib_a_vcorr_2000_2017
 for (i in 2:dim(pib_a_vcorr_2000_2017)[1]){
-  var_rib_1_pc[i,2] = rib_p_anoanterior_pc[i,-1] / pib_a_vcorr_2000_2017[i-1,-1]
+  var_rib_1_pc_2000_2017[i,2] = rib_p_anoanterior_pc_2000_2017[i,-1] / pib_a_vcorr_2000_2017[i-1,-1]
 }
 
-ind_pib_pc = var_pib_1_pc
-for (i in 2:dim(var_pib_1_pc)[1]){
-  ind_pib_pc[1,2] = 100
-  ind_pib_pc[i,2] = ind_pib_pc[i-1,2]*var_pib_1_pc[i,2]
+ind_pib_pc_2000_2017 = var_pib_1_pc_2000_2017
+for (i in 2:dim(var_pib_1_pc_2000_2017)[1]){
+  ind_pib_pc_2000_2017[1,2] = 100
+  ind_pib_pc_2000_2017[i,2] = ind_pib_pc_2000_2017[i-1,2]*var_pib_1_pc_2000_2017[i,2]
 }
 
-ind_rib_pc = var_rib_1_pc
-for (i in 2:dim(var_rib_1_pc)[1]){
-  ind_rib_pc[1,2] = 100
-  ind_rib_pc[i,2] = ind_rib_pc[i-1,2]*var_rib_1_pc[i,2]
+ind_rib_pc_2000_2017 = var_rib_1_pc_2000_2017
+for (i in 2:dim(var_rib_1_pc_2000_2017)[1]){
+  ind_rib_pc_2000_2017[1,2] = 100
+  ind_rib_pc_2000_2017[i,2] = ind_rib_pc_2000_2017[i-1,2]*var_rib_1_pc_2000_2017[i,2]
 }
 
-ind_rib_pib_pc = (ind_rib_pc[,-1] / ind_pib_pc[,-1])*100
-ind_rib_pib_pc = data.frame(ind_rib_pc[,1], ind_rib_pib_pc)
-
-#Deflatores com variação real anual
-
+ind_rib_pib_pc_2000_2017 = (ind_rib_pc_2000_2017[,-1] / ind_pib_pc_2000_2017[,-1])*100
+ind_rib_pib_pc_2000_2017 = data.frame(ind_rib_pc_2000_2017[,1], ind_rib_pib_pc_2000_2017)
 
 
 #SNA (2008)
+
 consolida_series = function(serie1, serie2, serie3, serie4){
+  serie1 = apply(serie1,2,function(x)as.numeric(gsub(",",".",x)))
+  serie1 = as.data.frame(serie1)
+  serie1 = filter(serie1, Período < 1991)
   
+  serie2 = apply(serie2,2,function(x)as.numeric(gsub(",",".",x)))
+  serie2 = as.data.frame(serie2)
+  serie2 = filter(serie2, Período > 1990, Período < 1997)
+  
+  serie3 = apply(serie3,2,function(x)as.numeric(gsub(",",".",x)))
+  serie3 = as.data.frame(serie3)
+  serie3_1 = filter(serie3, Período > 1996, Período < 2001)
+  
+  serie4 = apply(serie4,2,function(x)as.numeric(gsub(",",".",x)))
+  serie4 = as.data.frame(serie4)
+  serie4 = filter(serie4, Período > 2000, Período < 2018)
+  
+  serie3_2 = filter(serie3, Período > 2017)
+  
+  serie1 = na.omit(serie1)
+  serie2 = na.omit(serie2)
+  serie3 = na.omit(serie3)
+  serie4 = na.omit(serie4)
+  serie3_1 = na.omit(serie3_1)
+  serie3_2 = na.omit(serie3_2)
   
   primeira_juncao = merge(serie1, serie2, by = "Período", all = T)
-  segunda_juncao = merge(primeira_juncao, serie3, by = "Período", all = T)
+  segunda_juncao = merge(primeira_juncao, serie3_1, by = "Período", all = T)
   terceira_juncao = merge(segunda_juncao, serie4, by = "Período", all = T)
+  quarta_juncao = merge(terceira_juncao, serie3_2, by = "Período", all = T)
   
-  terceira_juncao = apply(terceira_juncao,2,function(x)as.numeric(gsub(",",".",x)))
-  terceira_juncao = as.data.frame(terceira_juncao)
-  colnames(terceira_juncao) = c("Período", "Série 1", "Série 2", "Série 3", "Série 4")
+  quarta_juncao = apply(quarta_juncao,2,function(x)as.numeric(gsub(",",".",x)))
+  quarta_juncao = as.data.frame(quarta_juncao)
+  colnames(quarta_juncao) = c("Período", "Série 1", "Série 2", "Série 3", "Série 4")
   
-  #return(terceira_juncao)}
+  base_final = cbind.data.frame(Período=quarta_juncao$'Período', Série = rowSums(quarta_juncao[, -1], na.rm = TRUE))
   
-  base_final = data.frame("Período" = terceira_juncao$'Período')
-  base_final$'Série'= NA
-  
-  #return(base_final)}
-  
-  for (i in 1:dim(base_final)[1]){
-    if (terceira_juncao$'Período'[i] < 1991)
-      base_final[i,2] = terceira_juncao[i,2]
-    if (terceira_juncao$'Período'[i] < 1990 & terceira_juncao$'Período'[i] > 1997)
-      base_final[i,2] = terceira_juncao[i,3]
-    if (terceira_juncao$'Período'[i] < 1996 & terceira_juncao$'Período'[i] > 2001)
-      base_final[i,2] = terceira_juncao[i,4]
-    if (terceira_juncao$'Período'[i] < 2000 & terceira_juncao$'Período'[i] > 2018)
-      base_final[i,2] = terceira_juncao[i,5]
-    if (terceira_juncao$'Período'[i] < 2017)
-      base_final[i,2] = terceira_juncao[i,4]
-  }
   return(base_final)
 }
 
-p_pib_SNA2 = consolida_series(p_pib_1947_1989, p_pib_vn_1990_2000, p_pib_vn_1996_2018, p_pib_pc)
+p_pib_SNA = consolida_series(p_pib_1947_1989, p_pib_vn_1990_2000, p_pib_vn_1996_2018, p_pib_pc)
+
 
 p_pib
 pib_a_vcon_2000_2017
