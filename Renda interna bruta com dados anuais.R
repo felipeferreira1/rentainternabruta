@@ -1,15 +1,14 @@
 #Rotina para calcular a renda interna bruta
 #Feito por: Felipe Simplício Ferreira
-#última atualização: 02/03/2020
-
 
 #Definindo diretórios a serem utilizados
-
 getwd()
 setwd("C:\\Users\\User\\Documents\\GitHub\\rentainternabruta")
 
 #Carregando pacotes que serão utilizados
 library(readxl)
+library(dplyr)
+
 
 #Funções
 arrumar_tabelas = function(df_entrada ,qtd_colunas){
@@ -69,10 +68,17 @@ deflatores_mult = function(numerador, denominador, nome_data, nome_dados){
   return(df_saida)
 }
 
+
 ######PARTE 1######
 #Carregando arquivo das contas anuais 1947-1989 (ref1987)
 tabela_ca_1947_1989 = read_excel("dados.xlsx", sheet = "Anual_1947-1989 (ref1987)")
 tabela_ca_1947_1989 = arrumar_tabelas(tabela_ca_1947_1989, 2:62)
+
+
+#Valores correntes
+export_a_vcorr_1947_1989 = separar_colunas('Período', 'Exportação', tabela_ca_1947_1989)
+import_a_vcorr_1947_1989 = separar_colunas('Período', 'Importação', tabela_ca_1947_1989)
+
 
 #Importando deflatores
 px_1947_1989 = separar_colunas('Período', 'Px_preço', tabela_ca_1947_1989)
@@ -425,10 +431,11 @@ ind_rib_pib_pc_2000_2017 = data.frame(ind_rib_pc_2000_2017[,1], ind_rib_pib_pc_2
 
 #SNA (2008)
 
-consolida_series = function(serie1, serie2, serie3, serie4){
+#Funções
+consolida_series = function(serie1, serie2, serie3, serie4, nome_juncao){
   serie1 = apply(serie1,2,function(x)as.numeric(gsub(",",".",x)))
   serie1 = as.data.frame(serie1)
-  serie1 = filter(serie1, Período < 1991)
+  serie1 = filter(serie1, Período > 1947, Período < 1991)
   
   serie2 = apply(serie2,2,function(x)as.numeric(gsub(",",".",x)))
   serie2 = as.data.frame(serie2)
@@ -461,27 +468,41 @@ consolida_series = function(serie1, serie2, serie3, serie4){
   colnames(quarta_juncao) = c("Período", "Série 1", "Série 2", "Série 3", "Série 4")
   
   base_final = cbind.data.frame(Período=quarta_juncao$'Período', Série = rowSums(quarta_juncao[, -1], na.rm = TRUE))
+  colnames(base_final) = c("Período", nome_juncao)
   
   return(base_final)
 }
 
-p_pib_SNA = consolida_series(p_pib_1947_1989, p_pib_vn_1990_2000, p_pib_vn_1996_2018, p_pib_pc)
+
+#Junção das diferentes séries
+p_pib_SNA = consolida_series(p_pib_1947_1989, p_pib_vn_1990_2000, p_pib_vn_1996_2018, p_pib_pc_2000_2017, "Deflator do PIB")
+pib_p_SNA = consolida_series(pib_p_ano_anterior_1947_1989, pib_p_ano_anterior_1990_2000, pib_p_ano_anterior_1996_2018, pib_a_vcon_2000_2017, "PIBreal (PIB a preços do ano anterior)")
+x_px_SNA = consolida_series(x_px_1947_1989, x_px_vn_1990_2000, x_px_vn_1996_2018, x_px_pc_2000_2017, "{- (X/Px)}")
+m_pm_SNA = consolida_series(m_pm_1947_1989, m_pm_vn_1990_2000, m_pm_vn_1996_2018, m_pm_pc_2000_2017, "{+ (M/Pm)}")
+
+absorv_dom_SNA = pib_p_SNA[,-1] - x_px_SNA[,-1] + m_pm_SNA[,-1]
+absorv_dom_SNA = data.frame(pib_p_SNA[,1], absorv_dom_SNA)
+colnames(absorv_dom_SNA) = c("Período", "(= Absorção Interna)")
+
+export_SNA = consolida_series(export_a_vcorr_1947_1989, export_a_vcorr_1990_2000, export_a_vcorr_1996_2018, export_a_vcorr_2000_2017, "Exportações")
+pa_SNA = consolida_series(pa_calc_1947_1989, pa_vn_1990_2000, pa_vn_1996_2018, pa_pc_2000_2017, "Pa")
+x_pa_SNA = export_SNA[,-1] / pa_SNA[,-1]
+x_pa_SNA = data.frame(export_SNA[,1], x_pa_SNA)
+colnames(x_pa_SNA) = c("Período", "{+ (X/Pa)}")
+
+import_SNA = consolida_series(import_a_vcorr_1947_1989, import_a_vcorr_1990_2000, import_a_vcorr_1996_2018, import_a_vcorr_2000_2017, "Importações")
+m_pa_SNA = import_SNA[,-1] / pa_SNA[,-1]
+m_pa_SNA = data.frame(import_SNA[,1], m_pa_SNA)
+colnames(m_pa_SNA) = c("Período", "{- (M/Pa)}")
+
+rib_SNA = absorv_dom_SNA[,-1] + x_pa_SNA[,-1] - m_pa_SNA[,-1]
+rib_SNA = data.frame(absorv_dom_SNA[,1], rib_SNA)
+colnames(rib_SNA) = c("Período", "(= RIBreal)")
+
+gc_SNA = deflatores_sub(rib_SNA, pib_p_SNA, "Período ","GC")
+gc_pib_SNA = deflatores_div(gc_SNA, pib_p_SNA, "Período", "GC/PIB")
 
 
-p_pib
-pib_a_vcon_2000_2017
-x_px
-m_pm
-absorv_dom_a_vcon_2000_2017
-
-x_pa = export_a_vcorr_2000_2017[,-1] / pa[,-1]
-x_pa = data.frame(export_a_vcorr_2000_2017[,1], x_pa)
-
-m_pa = - (import_a_vcorr_2000_2017[,-1] / pa[,-1])
-m_pa = data.frame(import_a_vcorr_2000_2017[,1], m_pa)
-
-rib_p_anoanterior
-gc
 
 var_real_pib = var_pib_1[,-1] - 1
 var_real_pib = data.frame(var_pib_1[,1], var_real_pib)
