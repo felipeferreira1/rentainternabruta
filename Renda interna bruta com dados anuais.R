@@ -47,23 +47,23 @@ deflatores_div = function(numerador, denominador, nome_data, nome_dados){
   return(df_saida)
 }
 
-deflatores_sub = function(numerador, denominador, nome_data, nome_dados){
-  df_saida = numerador[,-1] - denominador[,-1]
-  df_saida = data.frame(numerador[,1], df_saida)
+deflatores_sub = function(minuendo, subtraendo, nome_data, nome_dados){
+  df_saida = minuendo[,-1] - subtraendo[,-1]
+  df_saida = data.frame(minuendo[,1], df_saida)
   colnames(df_saida) = c(nome_data, nome_dados)
   return(df_saida)
 }
 
-deflatores_soma = function(numerador, denominador, nome_data, nome_dados){
-  df_saida = numerador[,-1] + denominador[,-1]
-  df_saida = data.frame(numerador[,1], df_saida)
+deflatores_soma = function(parcela1, parcela2, nome_data, nome_dados){
+  df_saida = parcela1[,-1] + parcela2[,-1]
+  df_saida = data.frame(parcela1[,1], df_saida)
   colnames(df_saida) = c(nome_data, nome_dados)
   return(df_saida)
 }
 
-deflatores_mult = function(numerador, denominador, nome_data, nome_dados){
-  df_saida = numerador[,-1] * denominador[,-1]
-  df_saida = data.frame(numerador[,1], df_saida)
+deflatores_mult = function(fator1, fator2, nome_data, nome_dados){
+  df_saida = fator1[,-1] * fator2[,-1]
+  df_saida = data.frame(fator1[,1], df_saida)
   colnames(df_saida) = c(nome_data, nome_dados)
   return(df_saida)
 }
@@ -78,6 +78,10 @@ tabela_ca_1947_1989 = arrumar_tabelas(tabela_ca_1947_1989, 2:62)
 #Valores correntes
 export_a_vcorr_1947_1989 = separar_colunas('Período', 'Exportação', tabela_ca_1947_1989)
 import_a_vcorr_1947_1989 = separar_colunas('Período', 'Importação', tabela_ca_1947_1989)
+var_pib_pc_1947_1989 = separar_colunas('Período', 'Variação Anual do PIB Real (%)', tabela_ca_1947_1989)
+
+var_rib_pc_1947_1989 = separar_colunas('Período', 'Var.% RIB +1 com Pa calculado', tabela_ca_1947_1989)
+var_rib_pc_1947_1989$`Var.% RIB +1 com Pa calculado` = var_rib_pc_1947_1989$`Var.% RIB +1 com Pa calculado`-1
 
 
 #Importando deflatores
@@ -203,6 +207,9 @@ for (i in 2:dim(pib_a_vcorr_1990_2000)[1]){
   var_rib_1_vn_1990_2000[i,2] = rib_p_ano_anterior_vn_1990_2000[i,-1] / pib_a_vcorr_1990_2000[(i-1),-1]
 }
 
+var_rib_vn_1990_2000 = var_rib_1_vn_1990_2000
+var_rib_vn_1990_2000$PIB = var_rib_vn_1990_2000$PIB-1
+
 ind_pib_vn_1990_2000 = pib_a_vra_1990_2000
 ind_pib_vn_1990_2000[1,2] = 100
 for (i in 2:dim(pib_a_vra_1990_2000)[1]){
@@ -315,6 +322,9 @@ for (i in 2:dim(pib_a_vcorr_1996_2018)[1]){
   var_rib_1_vn_1996_2018[i,2] = rib_p_ano_anterior_vn_1996_2018[i,-1] / pib_a_vcorr_1996_2018[(i-1),-1]
 }
 
+var_rib_vn_1996_2018 = var_rib_1_vn_1996_2018
+var_rib_vn_1996_2018$PIB = var_rib_1_vn_1996_2018$PIB-1
+
 ind_pib_vn_1996_2018 = pib_a_vra_1996_2018
 ind_pib_vn_1996_2018[1,2] = 100
 for (i in 2:dim(pib_a_vra_1996_2018)[1]){
@@ -394,6 +404,8 @@ for (i in 2:dim(pib_a_vcorr_2000_2017)[1]){
   var_pib_1_pc_2000_2017[i,2] = pib_a_vcon_2000_2017[i,-1] / pib_a_vcorr_2000_2017[i-1,-1]
 }
 
+var_pib_pc_2000_2017 = data.frame(Período = var_pib_1_pc_2000_2017$Período, Var = (var_pib_1_pc_2000_2017$PIB-1)*100)
+
 tt_pc_2000_2017 = deflatores_div(px_pc_2000_2017, pm_pc_2000_2017, "Período", "Termos de troca")
 x_m_pc_2000_2017 = deflatores_soma(export_a_vcorr_2000_2017, import_a_vcorr_2000_2017, "Período", "(X-M)")
 x_m_pa_pc_2000_2017 = deflatores_div(x_m_pc_2000_2017, pa_pc_2000_2017, "Período", "(X-M)/Pa")
@@ -410,8 +422,11 @@ rib_p_ano_anterior_pc_2000_2017 = deflatores_soma(gc_pc_2000_2017, pib_a_vcon_20
 
 var_rib_1_pc_2000_2017 = pib_a_vcorr_2000_2017
 for (i in 2:dim(pib_a_vcorr_2000_2017)[1]){
-  var_rib_1_pc_2000_2017[i,2] = rib_p_anoanterior_pc_2000_2017[i,-1] / pib_a_vcorr_2000_2017[i-1,-1]
+  var_rib_1_pc_2000_2017[i,2] = rib_p_ano_anterior_pc_2000_2017[i,-1] / pib_a_vcorr_2000_2017[i-1,-1]
 }
+
+var_rib_pc_2000_2017 = var_rib_1_pc_2000_2017
+var_rib_pc_2000_2017$PIB = var_rib_pc_2000_2017$PIB-1
 
 ind_pib_pc_2000_2017 = var_pib_1_pc_2000_2017
 for (i in 2:dim(var_pib_1_pc_2000_2017)[1]){
@@ -502,17 +517,21 @@ colnames(rib_SNA) = c("Período", "(= RIBreal)")
 gc_SNA = deflatores_sub(rib_SNA, pib_p_SNA, "Período ","GC")
 gc_pib_SNA = deflatores_div(gc_SNA, pib_p_SNA, "Período", "GC/PIB")
 
+var_pib_SNA = consolida_series(var_pib_pc_1947_1989, pib_a_vra_1990_2000, pib_a_vra_1996_2018, var_pib_pc_2000_2017, "Var. Real (%) PIB")
+var_pib_SNA$`Var. Real (%) PIB` = var_pib_SNA$`Var. Real (%) PIB`/100
+var_rib_SNA = consolida_series(var_rib_pc_1947_1989, var_rib_vn_1990_2000, var_rib_vn_1996_2018, var_rib_pc_2000_2017, "Var. Real (%) RIB")
 
+gc_porc_pib_SNA = deflatores_sub(var_rib_SNA, var_pib_SNA, "Período", "GC(%) do PIB")
 
-var_real_pib = var_pib_1[,-1] - 1
-var_real_pib = data.frame(var_pib_1[,1], var_real_pib)
+px_SNA = consolida_series(px_1947_1989, px_vn_1990_2000, px_vn_1996_2018, px_pc_2000_2017, "Px")
+pm_SNA = consolida_series(pm_1947_1989, pm_vn_1990_2000, pm_vn_1996_2018, pm_pc_2000_2017, "Pm")
+tt_SNA = deflatores_div(px_SNA, pm_SNA, "Período", "Termos de Troca")
 
-var_real_rib = var_rib_1[,-1] - 1
-var_real_rib = data.frame(var_rib_1[,1], var_real_rib)
-
-gc_pib
-tt
-
-#índices?
+#PAREI NOS ÍNDICES
+ind_pib_SNA = pib_p_SNA
+ind_pib_SNA[1,2] = 100
+for (i in 2:dim(pib_p_SNA)[1]){
+  ind_pib_SNA[i,2] = ind_pib_SNA[i-1,2] * (pib_a_vra_1990_2000[i,2] / 100 + 1)
+}
 
 
