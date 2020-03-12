@@ -514,7 +514,7 @@ rib_SNA = absorv_dom_SNA[,-1] + x_pa_SNA[,-1] - m_pa_SNA[,-1]
 rib_SNA = data.frame(absorv_dom_SNA[,1], rib_SNA)
 colnames(rib_SNA) = c("Período", "(= RIBreal)")
 
-gc_SNA = deflatores_sub(rib_SNA, pib_p_SNA, "Período ","GC")
+gc_SNA = deflatores_sub(rib_SNA, pib_p_SNA, "Período","GC")
 gc_pib_SNA = deflatores_div(gc_SNA, pib_p_SNA, "Período", "GC/PIB")
 
 var_pib_SNA = consolida_series(var_pib_pc_1947_1989, pib_a_vra_1990_2000, pib_a_vra_1996_2018, var_pib_pc_2000_2017, "Var. Real (%) PIB")
@@ -527,11 +527,59 @@ px_SNA = consolida_series(px_1947_1989, px_vn_1990_2000, px_vn_1996_2018, px_pc_
 pm_SNA = consolida_series(pm_1947_1989, pm_vn_1990_2000, pm_vn_1996_2018, pm_pc_2000_2017, "Pm")
 tt_SNA = deflatores_div(px_SNA, pm_SNA, "Período", "Termos de Troca")
 
-#PAREI NOS ÍNDICES
-ind_pib_SNA = pib_p_SNA
-ind_pib_SNA[1,2] = 100
-for (i in 2:dim(pib_p_SNA)[1]){
-  ind_pib_SNA[i,2] = ind_pib_SNA[i-1,2] * (pib_a_vra_1990_2000[i,2] / 100 + 1)
+ind_pib_SNA = var_pib_SNA
+ind_pib_SNA = rbind(c(1947,100), ind_pib_SNA)
+for (i in 2:dim(ind_pib_SNA)[1]){
+  ind_pib_SNA[i,2] = ind_pib_SNA[i-1,2] * (var_pib_SNA[i-1,2] + 1)
 }
+colnames(ind_pib_SNA) = c("Período", "Índice PIB (1947=100)")
 
+ind_rib_SNA = var_rib_SNA
+ind_rib_SNA = rbind(c(1947,100), ind_rib_SNA)
+for (i in 2:dim(ind_rib_SNA)[1]){
+  ind_rib_SNA[i,2] = ind_rib_SNA[i-1,2] * (var_rib_SNA[i-1,2] + 1)
+}
+colnames(ind_rib_SNA) = c("Período", "Índice RIB (1947=100)")
 
+ind_pa_calculado_SNA = var_pib_SNA
+ind_pa_calculado_SNA = rbind(c(1947,100), ind_pa_calculado_SNA)
+for (i in 2:dim(ind_pa_calculado_SNA)[1]){
+  ind_pa_calculado_SNA[i,2] = (ind_rib_SNA[i,2]/ind_pib_SNA[i,2])*100
+}
+colnames(ind_pa_calculado_SNA) = c("Período", "Pa calculado")
+
+pa_calc_perc_SNA = ind_pib_SNA
+pa_calc_perc_SNA[1,2] = NA
+for (i in 2:dim(ind_pa_calculado_SNA)[1]){
+  pa_calc_perc_SNA[i,2] = (ind_pa_calculado_SNA[i,2]/ind_pa_calculado_SNA[i-1,2])-1
+}
+colnames(pa_calc_perc_SNA) = c("Período", "Pa calculado - %")
+
+tabela_SNA = c(p_pib_SNA,
+               pib_p_SNA,
+               x_px_SNA,
+               m_pm_SNA,
+               absorv_dom_SNA)
+
+tabela_SNA = p_pib_SNA
+tabela_SNA = merge(tabela_SNA, pib_p_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, x_px_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, m_pm_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, absorv_dom_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, x_pa_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, m_pa_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, rib_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, gc_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, gc_pib_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, var_pib_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, var_rib_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, gc_porc_pib_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, tt_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, ind_pib_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, ind_rib_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, ind_pa_calculado_SNA, by = "Período", all = T)
+tabela_SNA = merge(tabela_SNA, pa_calc_perc_SNA, by = "Período", all = T)
+
+write.csv2(tabela_SNA,"SNA 2008 - Pa calculado até 90.csv", row.names = F)
+
+#m_pa, rib, gc, gc/pib
