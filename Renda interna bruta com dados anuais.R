@@ -646,3 +646,63 @@ tabela_REINS = merge(tabela_REINS, tgi_REINS, by = "Período", all = T)
 tabela_REINS = merge(tabela_REINS, ind_gc_REINS, by = "Período", all = T)
 
 write.csv2(tabela_REINS,"Reinsdorf (2009) - Pa calc 90.csv", row.names = F)
+
+#Kohli (2008) t - Pa calc até 90
+#Junção das diferentes séries
+sx_KOH = sx_REINS
+sm_KOH = sm_REINS
+
+sa_KOH = sx_sm_2_REINS
+colnames(sa_KOH) = c("Período", "Sa = (Sx + Sm)/2")
+
+sb_KOH = deflatores_sub(sx_KOH, sm_KOH, "Período", "Sb = Sx - Sm")
+
+tt_KOH = tt_REINS
+colnames(tt_KOH) = c("Período", " TTt/TTt-1")
+
+ln_tt_KOH = tt_REINS
+ln_tt_KOH[,-1] = log(ln_tt_KOH[,-1], base = exp(1))
+
+p_relativos_KOH = p_relativos_REINS
+
+ln_p_relativos_KOH = p_relativos_KOH
+ln_p_relativos_KOH[,-1] = log(ln_p_relativos_KOH[,-1], base = exp(1))
+
+efeito_troca_KOH = deflatores_mult(sa_KOH, ln_tt_KOH, "Período", "Efeito Termos de Troca (Sat * lnTTt/TTt-1)")
+efeito_precos_KOH = deflatores_mult(sb_KOH, ln_p_relativos_KOH, "Período", "Efeito Preços Relativos (Sbt * lnPrt/Prt-1)")
+soma_efeitos_KOH = deflatores_soma(efeito_troca_KOH, efeito_precos_KOH, "Período", "Soma dos dois efeitos")
+
+exp_KOH = soma_efeitos_KOH
+exp_KOH[,-1] = exp(exp_KOH[,-1])
+colnames(exp_KOH) = c("Período", "Exp()")
+
+ind_gc_KOH = exp_KOH
+ind_gc_KOH = rbind(c(1947,100), ind_gc_KOH)
+for (i in 2:dim(ind_gc_KOH)[1]){
+  ind_gc_KOH[i,2] = ind_gc_KOH[(i-1),2]*exp_KOH[(i-1),2]
+}
+colnames(ind_gc_KOH) = c("Período", "Índice de ganhos de comércio (Kohli 2008) (Pa média harmônica até 1990)")
+
+ind_gc_var_KOH = ind_gc_KOH
+for (i in 2:dim(ind_gc_var_KOH)[1]){
+  ind_gc_var_KOH[i,2] = (ind_gc_KOH[i,2]/ind_gc_KOH[(i-1),2])-1
+}
+ind_gc_var_KOH[1,2] = NA
+colnames(ind_gc_var_KOH) = c("Período", "Índice de ganhos de comércio Kohli var% (Pa média harmônica até 1990)")
+
+tabela_KOH = sx_KOH
+tabela_KOH = merge(tabela_KOH, sm_KOH, by = "Período", all = T)
+tabela_KOH = merge(tabela_KOH, sa_KOH, by = "Período", all = T)
+tabela_KOH = merge(tabela_KOH, sb_KOH, by = "Período", all = T)
+tabela_KOH = merge(tabela_KOH, tt_KOH, by = "Período", all = T)
+tabela_KOH = merge(tabela_KOH, ln_tt_KOH, by = "Período", all = T)
+tabela_KOH = merge(tabela_KOH, p_relativos_KOH, by = "Período", all = T)
+tabela_KOH = merge(tabela_KOH, ln_p_relativos_KOH, by = "Período", all = T)
+tabela_KOH = merge(tabela_KOH, efeito_troca_KOH, by = "Período", all = T)
+tabela_KOH = merge(tabela_KOH, efeito_precos_KOH, by = "Período", all = T)
+tabela_KOH = merge(tabela_KOH, soma_efeitos_KOH, by = "Período", all = T)
+tabela_KOH = merge(tabela_KOH, exp_KOH, by = "Período", all = T)
+tabela_KOH = merge(tabela_KOH, ind_gc_KOH, by = "Período", all = T)
+tabela_KOH = merge(tabela_KOH, ind_gc_var_KOH, by = "Período", all = T)
+
+write.csv2(tabela_KOH,"Kohli (2008) t - Pa calc até 90.csv", row.names = F)
