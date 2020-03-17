@@ -408,7 +408,7 @@ for (i in 2:dim(pib_a_vcorr_2000_2017)[1]){
 var_pib_pc_2000_2017 = data.frame(Período = var_pib_1_pc_2000_2017$Período, Var = (var_pib_1_pc_2000_2017$PIB-1)*100)
 
 tt_pc_2000_2017 = deflatores_div(px_pc_2000_2017, pm_pc_2000_2017, "Período", "Termos de troca")
-x_m_pc_2000_2017 = deflatores_soma(export_a_vcorr_2000_2017, import_a_vcorr_2000_2017, "Período", "(X-M)")
+x_m_pc_2000_2017 = deflatores_sub(export_a_vcorr_2000_2017, import_a_vcorr_2000_2017, "Período", "(X-M)")
 x_m_pa_pc_2000_2017 = deflatores_div(x_m_pc_2000_2017, pa_pc_2000_2017, "Período", "(X-M)/Pa")
 x_px_pc_2000_2017 = deflatores_div(export_a_vcorr_2000_2017, px_pc_2000_2017, "Período", "X/Px")
 
@@ -448,36 +448,36 @@ ind_rib_pib_pc_2000_2017 = data.frame(ind_rib_pc_2000_2017[,1], ind_rib_pib_pc_2
 #SNA (2008)
 
 #Funções
-consolida_series = function(serie1, serie2, serie3, serie4, nome_juncao){
-  serie1 = apply(serie1,2,function(x)as.numeric(gsub(",",".",x)))
-  serie1 = as.data.frame(serie1)
-  serie1 = filter(serie1, Período > 1947, Período < 1991)
+consolida_series = function(serie_47_89, serie_90_00, serie_96_18, serie_00_17, nome_juncao){
+  serie_47_89 = apply(serie_47_89,2,function(x)as.numeric(gsub(",",".",x)))
+  serie_47_89 = as.data.frame(serie_47_89)
+  serie_47_89 = filter(serie_47_89, Período > 1947, Período < 1991)
   
-  serie2 = apply(serie2,2,function(x)as.numeric(gsub(",",".",x)))
-  serie2 = as.data.frame(serie2)
-  serie2 = filter(serie2, Período > 1990, Período < 1997)
+  serie_90_00 = apply(serie_90_00,2,function(x)as.numeric(gsub(",",".",x)))
+  serie_90_00 = as.data.frame(serie_90_00)
+  serie_90_00 = filter(serie_90_00, Período > 1990, Período < 1997)
   
-  serie3 = apply(serie3,2,function(x)as.numeric(gsub(",",".",x)))
-  serie3 = as.data.frame(serie3)
-  serie3_1 = filter(serie3, Período > 1996, Período < 2001)
+  serie_96_18 = apply(serie_96_18,2,function(x)as.numeric(gsub(",",".",x)))
+  serie_96_18 = as.data.frame(serie_96_18)
+  serie_96_18_1 = filter(serie_96_18, Período > 1996, Período < 2001)
   
-  serie4 = apply(serie4,2,function(x)as.numeric(gsub(",",".",x)))
-  serie4 = as.data.frame(serie4)
-  serie4 = filter(serie4, Período > 2000, Período < 2018)
+  serie_00_17 = apply(serie_00_17,2,function(x)as.numeric(gsub(",",".",x)))
+  serie_00_17 = as.data.frame(serie_00_17)
+  serie_00_17 = filter(serie_00_17, Período > 2000, Período < 2018)
   
-  serie3_2 = filter(serie3, Período > 2017)
+  serie_96_18_2 = filter(serie_96_18, Período > 2017)
   
-  serie1 = na.omit(serie1)
-  serie2 = na.omit(serie2)
-  serie3 = na.omit(serie3)
-  serie4 = na.omit(serie4)
-  serie3_1 = na.omit(serie3_1)
-  serie3_2 = na.omit(serie3_2)
+  serie_47_89 = na.omit(serie_47_89)
+  serie_90_00 = na.omit(serie_90_00)
+  serie_96_18 = na.omit(serie_96_18)
+  serie_00_17 = na.omit(serie_00_17)
+  serie_96_18_1 = na.omit(serie_96_18_1)
+  serie_96_18_2 = na.omit(serie_96_18_2)
   
-  primeira_juncao = merge(serie1, serie2, by = "Período", all = T)
-  segunda_juncao = merge(primeira_juncao, serie3_1, by = "Período", all = T)
-  terceira_juncao = merge(segunda_juncao, serie4, by = "Período", all = T)
-  quarta_juncao = merge(terceira_juncao, serie3_2, by = "Período", all = T)
+  primeira_juncao = merge(serie_47_89, serie_90_00, by = "Período", all = T)
+  segunda_juncao = merge(primeira_juncao, serie_96_18_1, by = "Período", all = T)
+  terceira_juncao = merge(segunda_juncao, serie_00_17, by = "Período", all = T)
+  quarta_juncao = merge(terceira_juncao, serie_96_18_2, by = "Período", all = T)
   
   quarta_juncao = apply(quarta_juncao,2,function(x)as.numeric(gsub(",",".",x)))
   quarta_juncao = as.data.frame(quarta_juncao)
