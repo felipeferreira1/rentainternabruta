@@ -68,6 +68,47 @@ deflatores_mult = function(fator1, fator2, nome_data, nome_dados){
   return(df_saida)
 }
 
+consolida_series = function(serie_47_89, serie_90_00, serie_96_18, serie_00_17, nome_juncao){
+  serie_47_89 = apply(serie_47_89,2,function(x)as.numeric(gsub(",",".",x)))
+  serie_47_89 = as.data.frame(serie_47_89)
+  serie_47_89 = filter(serie_47_89, Período > 1947, Período < 1991)
+  
+  serie_90_00 = apply(serie_90_00,2,function(x)as.numeric(gsub(",",".",x)))
+  serie_90_00 = as.data.frame(serie_90_00)
+  serie_90_00 = filter(serie_90_00, Período > 1990, Período < 1997)
+  
+  serie_96_18 = apply(serie_96_18,2,function(x)as.numeric(gsub(",",".",x)))
+  serie_96_18 = as.data.frame(serie_96_18)
+  serie_96_18_1 = filter(serie_96_18, Período > 1996, Período < 2001)
+  
+  serie_00_17 = apply(serie_00_17,2,function(x)as.numeric(gsub(",",".",x)))
+  serie_00_17 = as.data.frame(serie_00_17)
+  serie_00_17 = filter(serie_00_17, Período > 2000, Período < 2018)
+  
+  serie_96_18_2 = filter(serie_96_18, Período > 2017)
+  
+  serie_47_89 = na.omit(serie_47_89)
+  serie_90_00 = na.omit(serie_90_00)
+  serie_96_18 = na.omit(serie_96_18)
+  serie_00_17 = na.omit(serie_00_17)
+  serie_96_18_1 = na.omit(serie_96_18_1)
+  serie_96_18_2 = na.omit(serie_96_18_2)
+  
+  primeira_juncao = merge(serie_47_89, serie_90_00, by = "Período", all = T)
+  segunda_juncao = merge(primeira_juncao, serie_96_18_1, by = "Período", all = T)
+  terceira_juncao = merge(segunda_juncao, serie_00_17, by = "Período", all = T)
+  quarta_juncao = merge(terceira_juncao, serie_96_18_2, by = "Período", all = T)
+  
+  quarta_juncao = apply(quarta_juncao,2,function(x)as.numeric(gsub(",",".",x)))
+  quarta_juncao = as.data.frame(quarta_juncao)
+  colnames(quarta_juncao) = c("Período", "Série 1", "Série 2", "Série 3", "Série 4")
+  
+  base_final = cbind.data.frame(Período=quarta_juncao$"Período", Série = rowSums(quarta_juncao[, -1], na.rm = TRUE))
+  colnames(base_final) = c("Período", nome_juncao)
+  
+  return(base_final)
+}
+
 
 ######PARTE 1######
 #Carregando arquivo das contas anuais 1947-1989 (ref1987)
@@ -76,36 +117,41 @@ tabela_ca_1947_1989 = arrumar_tabelas(tabela_ca_1947_1989, 2:62)
 
 
 #Valores correntes
-export_a_vcorr_1947_1989 = separar_colunas('Período', 'Exportação', tabela_ca_1947_1989)
-import_a_vcorr_1947_1989 = separar_colunas('Período', 'Importação', tabela_ca_1947_1989)
-var_pib_pc_1947_1989 = separar_colunas('Período', 'Variação Anual do PIB Real (%)', tabela_ca_1947_1989)
+pib_a_vcorr_1947_1889 = separar_colunas("Período", "PIB", tabela_ca_1947_1989)
+export_a_vcorr_1947_1989 = separar_colunas("Período", "Exportação", tabela_ca_1947_1989)
+import_a_vcorr_1947_1989 = separar_colunas("Período", "Importação", tabela_ca_1947_1989)
+var_pib_pc_1947_1989 = separar_colunas("Período", "Variação Anual do PIB Real (%)", tabela_ca_1947_1989)
 
-var_rib_pc_1947_1989 = separar_colunas('Período', 'Var.% RIB +1 com Pa calculado', tabela_ca_1947_1989)
+var_rib_pc_1947_1989 = separar_colunas("Período", "Var.% RIB +1 com Pa calculado", tabela_ca_1947_1989)
 var_rib_pc_1947_1989$`Var.% RIB +1 com Pa calculado` = var_rib_pc_1947_1989$`Var.% RIB +1 com Pa calculado`-1
 
 
 #Importando deflatores
-px_1947_1989 = separar_colunas('Período', 'Px_preço', tabela_ca_1947_1989)
-pm_1947_1989 = separar_colunas('Período', 'Pm_preço', tabela_ca_1947_1989)
-pa_1947_1989 = separar_colunas('Período', 'Pa - IPC-RJ Média', tabela_ca_1947_1989)
-p_pib_1947_1989 = separar_colunas('Período', 'Ppib', tabela_ca_1947_1989)
-pa_calc_1947_1989 = separar_colunas('Período', 'Pa calculado', tabela_ca_1947_1989)
-p_tradables_mgeo_1947_1989 = separar_colunas('Período', 'P_tradables (m.geo)', tabela_ca_1947_1989)
-p_relativos_1947_1989 = separar_colunas('Período', 'Preços relativos (P_tradables/P_ñtradables)', tabela_ca_1947_1989)
-prt_pa_calc_1947_1989 = separar_colunas('Período', 'Prt com Pa calculado', tabela_ca_1947_1989)
-pib_p_ano_anterior_1947_1989 = separar_colunas('Período', 'PIB a preços do ano anterior', tabela_ca_1947_1989)
-tt_1947_1989 = separar_colunas('Período', 'Termos de Troca (Px/Pm)', tabela_ca_1947_1989)
-x_m_1947_1989 = separar_colunas('Período', '(X-M)', tabela_ca_1947_1989)
-x_m_pa_1947_1989 = separar_colunas('Período', '(X-M)/Pa', tabela_ca_1947_1989)
-x_px_1947_1989 = separar_colunas('Período', 'X/Px_preço', tabela_ca_1947_1989)
-m_pm_1947_1989 = separar_colunas('Período', 'M/Pm_preço', tabela_ca_1947_1989)
-xpx_mpm_1947_1989 = separar_colunas('Período', 'X/Px-M/Pm', tabela_ca_1947_1989)
-gc_1947_1989 = separar_colunas('Período', 'GC', tabela_ca_1947_1989)
-gc_pib_1947_1989 = separar_colunas('Período', 'GC/PIB', tabela_ca_1947_1989)
-rib_p_ano_anterior_1947_1989 = separar_colunas('Período', 'RIB a preços do ano anterior', tabela_ca_1947_1989)
-ind_pib_1947_1989 = separar_colunas('Período', 'Índice PIB', tabela_ca_1947_1989)
-ind_rib_1947_1989 = separar_colunas('Período', 'Índice RIB Pa', tabela_ca_1947_1989)
-ind_rib_pib_1947_1989 = separar_colunas('Período', 'Índice RIB/PIB(Pa)', tabela_ca_1947_1989)
+px_1947_1989 = separar_colunas("Período", "Px_preço", tabela_ca_1947_1989)
+pm_1947_1989 = separar_colunas("Período", "Pm_preço", tabela_ca_1947_1989)
+pa_1947_1989 = separar_colunas("Período", "Pa - IPC-RJ Média", tabela_ca_1947_1989)
+p_pib_1947_1989 = separar_colunas("Período", "Ppib", tabela_ca_1947_1989)
+pa_calc_1947_1989 = separar_colunas("Período", "Pa calculado", tabela_ca_1947_1989)
+p_tradables_mgeo_1947_1989 = separar_colunas("Período", "P_tradables (m.geo)", tabela_ca_1947_1989)
+p_relativos_1947_1989 = separar_colunas("Período", "Preços relativos (P_tradables/P_ñtradables)", tabela_ca_1947_1989)
+prt_pa_calc_1947_1989 = separar_colunas("Período", "Prt com Pa calculado", tabela_ca_1947_1989)
+pib_p_ano_anterior_1947_1989 = separar_colunas("Período", "PIB a preços do ano anterior", tabela_ca_1947_1989)
+tt_1947_1989 = separar_colunas("Período", "Termos de Troca (Px/Pm)", tabela_ca_1947_1989)
+x_m_1947_1989 = separar_colunas("Período", "(X-M)", tabela_ca_1947_1989)
+x_m_pa_1947_1989 = separar_colunas("Período", "(X-M)/Pa", tabela_ca_1947_1989)
+x_px_1947_1989 = separar_colunas("Período", "X/Px_preço", tabela_ca_1947_1989)
+m_pm_1947_1989 = separar_colunas("Período", "M/Pm_preço", tabela_ca_1947_1989)
+xpx_mpm_1947_1989 = separar_colunas("Período", "X/Px-M/Pm", tabela_ca_1947_1989)
+gc_1947_1989 = separar_colunas("Período", "GC", tabela_ca_1947_1989)
+gc_pib_1947_1989 = separar_colunas("Período", "GC/PIB", tabela_ca_1947_1989)
+rib_p_ano_anterior_1947_1989 = separar_colunas("Período", "RIB a preços do ano anterior", tabela_ca_1947_1989)
+ind_pib_1947_1989 = separar_colunas("Período", "Índice PIB", tabela_ca_1947_1989)
+ind_rib_1947_1989 = separar_colunas("Período", "Índice RIB Pa", tabela_ca_1947_1989)
+ind_rib_pib_1947_1989 = separar_colunas("Período", "Índice RIB/PIB(Pa)", tabela_ca_1947_1989)
+
+#Cálculos extras
+sx_vn_1947_1989 = deflatores_div(export_a_vcorr_1947_1989, pib_a_vcorr_1947_1889, "Período", "Sx")
+sm_vn_1947_1989 = deflatores_div(import_a_vcorr_1947_1989, pib_a_vcorr_1947_1889, "Período", "Sm")
 
 
 ######PARTE 2######
@@ -115,27 +161,27 @@ tabela_ca_1990_2000 = read_excel("dados.xlsx", sheet = "Anual_1990-2000 (ref1985
 #valores correntes
 tabela_ca_1990_2000_vcorr = arrumar_tabelas(tabela_ca_1990_2000, 2:10)
 
-pib_a_vcorr_1990_2000 = separar_colunas('Período', 'PIB', tabela_ca_1990_2000_vcorr)
-consumo_familias_a_vcorr_1990_2000 = separar_colunas('Período', 'Consumo das Famílias', tabela_ca_1990_2000_vcorr)
-consumo_governo_a_vcorr_1990_2000 = separar_colunas('Período', 'Consumo do Governo', tabela_ca_1990_2000_vcorr)
-fbkf_a_vcorr_1990_2000 = separar_colunas('Período', 'Formação Bruta de Capital Fixo', tabela_ca_1990_2000_vcorr)
-var_est_a_vcorr_1996_2018 = separar_colunas('Período', 'Variação de Estoque', tabela_ca_1990_2000_vcorr)
-export_a_vcorr_1990_2000 = separar_colunas('Período', 'Exportação', tabela_ca_1990_2000_vcorr)
-import_a_vcorr_1990_2000 = separar_colunas('Período', 'Importação', tabela_ca_1990_2000_vcorr)
-absorv_dom_a_vcorr_1990_2000 = separar_colunas('Período', 'Absorção Doméstica', tabela_ca_1990_2000_vcorr)
-fbk_a_vcorr_1990_2000 = separar_colunas('Período', 'Formação Bruta de Capital', tabela_ca_1990_2000_vcorr)
+pib_a_vcorr_1990_2000 = separar_colunas("Período", "PIB", tabela_ca_1990_2000_vcorr)
+consumo_familias_a_vcorr_1990_2000 = separar_colunas("Período", "Consumo das Famílias", tabela_ca_1990_2000_vcorr)
+consumo_governo_a_vcorr_1990_2000 = separar_colunas("Período", "Consumo do Governo", tabela_ca_1990_2000_vcorr)
+fbkf_a_vcorr_1990_2000 = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ca_1990_2000_vcorr)
+var_est_a_vcorr_1996_2018 = separar_colunas("Período", "Variação de Estoque", tabela_ca_1990_2000_vcorr)
+export_a_vcorr_1990_2000 = separar_colunas("Período", "Exportação", tabela_ca_1990_2000_vcorr)
+import_a_vcorr_1990_2000 = separar_colunas("Período", "Importação", tabela_ca_1990_2000_vcorr)
+absorv_dom_a_vcorr_1990_2000 = separar_colunas("Período", "Absorção Doméstica", tabela_ca_1990_2000_vcorr)
+fbk_a_vcorr_1990_2000 = separar_colunas("Período", "Formação Bruta de Capital", tabela_ca_1990_2000_vcorr)
 
 
 #Variação real anual
 tabela_ca_1990_2000_vra = arrumar_tabelas(tabela_ca_1990_2000, 11:17)
 
-pib_a_vra_1990_2000 = separar_colunas('Período', 'PIB', tabela_ca_1990_2000_vra)
-consumo_familias_a_vra_1990_2000 = separar_colunas('Período', 'Consumo das Famílias', tabela_ca_1990_2000_vra)
-consumo_governo_a_vra_1990_2000 = separar_colunas('Período', 'Consumo do Governo', tabela_ca_1990_2000_vra)
-fbkf_a_vra_1990_2000 = separar_colunas('Período', 'Formação Bruta de Capital Fixo', tabela_ca_1990_2000_vra)
-fbk_a_vra_1990_2000 = separar_colunas('Período', 'Formação Bruta de Capital', tabela_ca_1990_2000_vra)
-export_a_vra_1990_2000 = separar_colunas('Período', 'Exportação', tabela_ca_1990_2000_vra)
-import_a_vra_1990_2000 = separar_colunas('Período', 'Importação', tabela_ca_1990_2000_vra)
+pib_a_vra_1990_2000 = separar_colunas("Período", "PIB", tabela_ca_1990_2000_vra)
+consumo_familias_a_vra_1990_2000 = separar_colunas("Período", "Consumo das Famílias", tabela_ca_1990_2000_vra)
+consumo_governo_a_vra_1990_2000 = separar_colunas("Período", "Consumo do Governo", tabela_ca_1990_2000_vra)
+fbkf_a_vra_1990_2000 = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ca_1990_2000_vra)
+fbk_a_vra_1990_2000 = separar_colunas("Período", "Formação Bruta de Capital", tabela_ca_1990_2000_vra)
+export_a_vra_1990_2000 = separar_colunas("Período", "Exportação", tabela_ca_1990_2000_vra)
+import_a_vra_1990_2000 = separar_colunas("Período", "Importação", tabela_ca_1990_2000_vra)
 
 
 #Variação nominal anual
@@ -234,25 +280,25 @@ tabela_ct_1996_2018 = read_excel("dados.xlsx", sheet = "Trimestral_1996-2018 (re
 #Valores correntes
 tabela_ct_1996_2018_vcorr = arrumar_tabelas(tabela_ct_1996_2018, 2:9)
 
-pib_a_vcorr_1996_2018 = separar_colunas('Período', 'PIB', tabela_ct_1996_2018_vcorr)
-consumo_familias_a_vcorr_1996_2018 = separar_colunas('Período', 'Consumo das Famílias', tabela_ct_1996_2018_vcorr)
-consumo_governo_a_vcorr_1996_2018 = separar_colunas('Período', 'Consumo do Governo', tabela_ct_1996_2018_vcorr)
-fbkf_a_vcorr_1996_2018 = separar_colunas('Período', 'Formação Bruta de Capital Fixo', tabela_ct_1996_2018_vcorr)
-export_a_vcorr_1996_2018 = separar_colunas('Período', 'Exportação', tabela_ct_1996_2018_vcorr)
-import_a_vcorr_1996_2018 = separar_colunas('Período', 'Importação', tabela_ct_1996_2018_vcorr)
-absorv_dom_a_vcorr_1996_2018 = separar_colunas('Período', 'Absorção Doméstica', tabela_ct_1996_2018_vcorr)
-var_est_a_vcorr_1996_2018 = separar_colunas('Período', 'Variação de Estoques', tabela_ct_1996_2018_vcorr)
+pib_a_vcorr_1996_2018 = separar_colunas("Período", "PIB", tabela_ct_1996_2018_vcorr)
+consumo_familias_a_vcorr_1996_2018 = separar_colunas("Período", "Consumo das Famílias", tabela_ct_1996_2018_vcorr)
+consumo_governo_a_vcorr_1996_2018 = separar_colunas("Período", "Consumo do Governo", tabela_ct_1996_2018_vcorr)
+fbkf_a_vcorr_1996_2018 = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ct_1996_2018_vcorr)
+export_a_vcorr_1996_2018 = separar_colunas("Período", "Exportação", tabela_ct_1996_2018_vcorr)
+import_a_vcorr_1996_2018 = separar_colunas("Período", "Importação", tabela_ct_1996_2018_vcorr)
+absorv_dom_a_vcorr_1996_2018 = separar_colunas("Período", "Absorção Doméstica", tabela_ct_1996_2018_vcorr)
+var_est_a_vcorr_1996_2018 = separar_colunas("Período", "Variação de Estoques", tabela_ct_1996_2018_vcorr)
 
 
 #Variação real anual
 tabela_ct_1996_2018_vra = arrumar_tabelas(tabela_ct_1996_2018, 10:15)
 
-pib_a_vra_1996_2018 = separar_colunas('Período', 'PIB', tabela_ct_1996_2018_vra)
-consumo_familias_a_vra_1996_2018 = separar_colunas('Período', 'Consumo das Famílias', tabela_ct_1996_2018_vra)
-consumo_governo_a_vra_1996_2018 = separar_colunas('Período', 'Consumo do Governo', tabela_ct_1996_2018_vra)
-fbkf_a_vra_1996_2018 = separar_colunas('Período', 'Formação Bruta de Capital Fixo', tabela_ct_1996_2018_vra)
-export_a_vra_1996_2018 = separar_colunas('Período', 'Exportação', tabela_ct_1996_2018_vra)
-import_a_vra_1996_2018 = separar_colunas('Período', 'Importação', tabela_ct_1996_2018_vra)
+pib_a_vra_1996_2018 = separar_colunas("Período", "PIB", tabela_ct_1996_2018_vra)
+consumo_familias_a_vra_1996_2018 = separar_colunas("Período", "Consumo das Famílias", tabela_ct_1996_2018_vra)
+consumo_governo_a_vra_1996_2018 = separar_colunas("Período", "Consumo do Governo", tabela_ct_1996_2018_vra)
+fbkf_a_vra_1996_2018 = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ct_1996_2018_vra)
+export_a_vra_1996_2018 = separar_colunas("Período", "Exportação", tabela_ct_1996_2018_vra)
+import_a_vra_1996_2018 = separar_colunas("Período", "Importação", tabela_ct_1996_2018_vra)
 
 
 #Variação nominal anual
@@ -349,26 +395,27 @@ tabela_ca_2000_2017= read_excel("dados.xlsx", sheet = "Anual_2000-2017 (ref2010)
 #valores correntes
 tabela_ca_2000_2017_vcorr = arrumar_tabelas(tabela_ca_2000_2017, 2:10)
 
-pib_a_vcorr_2000_2017 = separar_colunas('Período', 'PIB', tabela_ca_2000_2017_vcorr)
-consumo_familias_a_vcorr_2000_2017 = separar_colunas('Período', 'Consumo das Famílias', tabela_ca_2000_2017_vcorr)
-consumo_governo_a_vcorr_2000_2017 = separar_colunas('Período', 'Consumo do Governo', tabela_ca_2000_2017_vcorr)
-fbkf_a_vcorr_2000_2017 = separar_colunas('Período', 'Formação Bruta de Capital Fixo', tabela_ca_2000_2017_vcorr)
-export_a_vcorr_2000_2017 = separar_colunas('Período', 'Exportação', tabela_ca_2000_2017_vcorr)
-import_a_vcorr_2000_2017 = separar_colunas('Período', 'Importação', tabela_ca_2000_2017_vcorr)
+pib_a_vcorr_2000_2017 = separar_colunas("Período", "PIB", tabela_ca_2000_2017_vcorr)
+consumo_familias_a_vcorr_2000_2017 = separar_colunas("Período", "Consumo das Famílias", tabela_ca_2000_2017_vcorr)
+consumo_governo_a_vcorr_2000_2017 = separar_colunas("Período", "Consumo do Governo", tabela_ca_2000_2017_vcorr)
+fbkf_a_vcorr_2000_2017 = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ca_2000_2017_vcorr)
+export_a_vcorr_2000_2017 = separar_colunas("Período", "Exportação", tabela_ca_2000_2017_vcorr)
+import_a_vcorr_2000_2017 = separar_colunas("Período", "Importação", tabela_ca_2000_2017_vcorr)
 import_a_vcorr_2000_2017[,2] = import_a_vcorr_2000_2017[,2]*(-1)
-absorv_dom_a_vcorr_2000_2017 = separar_colunas('Período', 'Absorção Doméstica', tabela_ca_2000_2017_vcorr)
+absorv_dom_a_vcorr_2000_2017 = separar_colunas("Período", "Absorção Doméstica", tabela_ca_2000_2017_vcorr)
 
 
 #Valores constantes
 tabela_ca_2000_2017_vcon = arrumar_tabelas(tabela_ca_2000_2017, 11:19)
 
-pib_a_vcon_2000_2017 = separar_colunas('Período', 'PIB = PIB a preços do ano anterior', tabela_ca_2000_2017_vcon)
-consumo_familias_a_vcon_2000_2017 = separar_colunas('Período', 'Consumo das Famílias', tabela_ca_2000_2017_vcon)
-consumo_governo_a_vcon_2000_2017 = separar_colunas('Período', 'Consumo do Governo', tabela_ca_2000_2017_vcon)
-fbkf_a_vcon_2000_2017 = separar_colunas('Período', 'Formação Bruta de Capital Fixo', tabela_ca_2000_2017_vcon)
-export_a_vcon_2000_2017 = separar_colunas('Período', 'Exportação', tabela_ca_2000_2017_vcon)
-import_a_vcon_2000_2017 = separar_colunas('Período', 'Importação', tabela_ca_2000_2017_vcon)
-absorv_dom_a_vcon_2000_2017 = separar_colunas('Período', 'Absorção Doméstica', tabela_ca_2000_2017_vcon)
+pib_a_vcon_2000_2017 = separar_colunas("Período", "PIB = PIB a preços do ano anterior", tabela_ca_2000_2017_vcon)
+consumo_familias_a_vcon_2000_2017 = separar_colunas("Período", "Consumo das Famílias", tabela_ca_2000_2017_vcon)
+consumo_governo_a_vcon_2000_2017 = separar_colunas("Período", "Consumo do Governo", tabela_ca_2000_2017_vcon)
+fbkf_a_vcon_2000_2017 = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ca_2000_2017_vcon)
+export_a_vcon_2000_2017 = separar_colunas("Período", "Exportação", tabela_ca_2000_2017_vcon)
+import_a_vcon_2000_2017 = separar_colunas("Período", "Importação", tabela_ca_2000_2017_vcon)
+import_a_vcon_2000_2017[,2] = import_a_vcon_2000_2017[,2]*(-1)
+absorv_dom_a_vcon_2000_2017 = separar_colunas("Período", "Absorção Doméstica", tabela_ca_2000_2017_vcon)
 
 
 #Deflatores com valores constantes
@@ -382,7 +429,7 @@ saa_pc_2000_2017 = deflatores_div(absorv_dom_a_vcorr_2000_2017, pib_a_vcorr_2000
 p_pib_saa_pc_2000_2017 = deflatores_mult(p_pib_pc_2000_2017, saa_pc_2000_2017, "Período", "Ppib * Saa")
 sx_pc_2000_2017 = deflatores_div(export_a_vcorr_2000_2017, pib_a_vcorr_2000_2017, "Período", "Sx")
 
-sm_pc_2000_2017 = (import_a_vcorr_2000_2017[,-1] / pib_a_vcorr_2000_2017[,-1])*-1 #Precisa fazer ajuste nos valores negativos
+sm_pc_2000_2017 = import_a_vcorr_2000_2017[,-1] / pib_a_vcorr_2000_2017[,-1]
 sm_pc_2000_2017 = data.frame(import_a_vcorr_2000_2017[,1], sm_pc_2000_2017)
 colnames(sm_pc_2000_2017) = c("Período", "Sm")
 
@@ -412,7 +459,7 @@ x_m_pc_2000_2017 = deflatores_sub(export_a_vcorr_2000_2017, import_a_vcorr_2000_
 x_m_pa_pc_2000_2017 = deflatores_div(x_m_pc_2000_2017, pa_pc_2000_2017, "Período", "(X-M)/Pa")
 x_px_pc_2000_2017 = deflatores_div(export_a_vcorr_2000_2017, px_pc_2000_2017, "Período", "X/Px")
 
-m_pm_pc_2000_2017 = -import_a_vcorr_2000_2017[,-1] / pm_pc_2000_2017[,-1]
+m_pm_pc_2000_2017 = import_a_vcorr_2000_2017[,-1] / pm_pc_2000_2017[,-1]
 m_pm_pc_2000_2017 = data.frame(import_a_vcorr_2000_2017[,1], m_pm_pc_2000_2017)
 colnames(m_pm_pc_2000_2017) = c("Período", "M/Pm")
 
@@ -446,50 +493,6 @@ ind_rib_pib_pc_2000_2017 = data.frame(ind_rib_pc_2000_2017[,1], ind_rib_pib_pc_2
 
 
 #SNA (2008)
-
-#Funções
-consolida_series = function(serie_47_89, serie_90_00, serie_96_18, serie_00_17, nome_juncao){
-  serie_47_89 = apply(serie_47_89,2,function(x)as.numeric(gsub(",",".",x)))
-  serie_47_89 = as.data.frame(serie_47_89)
-  serie_47_89 = filter(serie_47_89, Período > 1947, Período < 1991)
-  
-  serie_90_00 = apply(serie_90_00,2,function(x)as.numeric(gsub(",",".",x)))
-  serie_90_00 = as.data.frame(serie_90_00)
-  serie_90_00 = filter(serie_90_00, Período > 1990, Período < 1997)
-  
-  serie_96_18 = apply(serie_96_18,2,function(x)as.numeric(gsub(",",".",x)))
-  serie_96_18 = as.data.frame(serie_96_18)
-  serie_96_18_1 = filter(serie_96_18, Período > 1996, Período < 2001)
-  
-  serie_00_17 = apply(serie_00_17,2,function(x)as.numeric(gsub(",",".",x)))
-  serie_00_17 = as.data.frame(serie_00_17)
-  serie_00_17 = filter(serie_00_17, Período > 2000, Período < 2018)
-  
-  serie_96_18_2 = filter(serie_96_18, Período > 2017)
-  
-  serie_47_89 = na.omit(serie_47_89)
-  serie_90_00 = na.omit(serie_90_00)
-  serie_96_18 = na.omit(serie_96_18)
-  serie_00_17 = na.omit(serie_00_17)
-  serie_96_18_1 = na.omit(serie_96_18_1)
-  serie_96_18_2 = na.omit(serie_96_18_2)
-  
-  primeira_juncao = merge(serie_47_89, serie_90_00, by = "Período", all = T)
-  segunda_juncao = merge(primeira_juncao, serie_96_18_1, by = "Período", all = T)
-  terceira_juncao = merge(segunda_juncao, serie_00_17, by = "Período", all = T)
-  quarta_juncao = merge(terceira_juncao, serie_96_18_2, by = "Período", all = T)
-  
-  quarta_juncao = apply(quarta_juncao,2,function(x)as.numeric(gsub(",",".",x)))
-  quarta_juncao = as.data.frame(quarta_juncao)
-  colnames(quarta_juncao) = c("Período", "Série 1", "Série 2", "Série 3", "Série 4")
-  
-  base_final = cbind.data.frame(Período=quarta_juncao$'Período', Série = rowSums(quarta_juncao[, -1], na.rm = TRUE))
-  colnames(base_final) = c("Período", nome_juncao)
-  
-  return(base_final)
-}
-
-
 #Junção das diferentes séries
 p_pib_SNA = consolida_series(p_pib_1947_1989, p_pib_vn_1990_2000, p_pib_vn_1996_2018, p_pib_pc_2000_2017, "Deflator do PIB")
 pib_p_SNA = consolida_series(pib_p_ano_anterior_1947_1989, pib_p_ano_anterior_1990_2000, pib_p_ano_anterior_1996_2018, pib_a_vcon_2000_2017, "PIBreal (PIB a preços do ano anterior)")
@@ -556,12 +559,6 @@ for (i in 2:dim(ind_pa_calculado_SNA)[1]){
 }
 colnames(pa_calc_perc_SNA) = c("Período", "Pa calculado - %")
 
-tabela_SNA = c(p_pib_SNA,
-               pib_p_SNA,
-               x_px_SNA,
-               m_pm_SNA,
-               absorv_dom_SNA)
-
 tabela_SNA = p_pib_SNA
 tabela_SNA = merge(tabela_SNA, pib_p_SNA, by = "Período", all = T)
 tabela_SNA = merge(tabela_SNA, x_px_SNA, by = "Período", all = T)
@@ -582,3 +579,70 @@ tabela_SNA = merge(tabela_SNA, ind_pa_calculado_SNA, by = "Período", all = T)
 tabela_SNA = merge(tabela_SNA, pa_calc_perc_SNA, by = "Período", all = T)
 
 write.csv2(tabela_SNA,"SNA 2008 - Pa calculado até 90.csv", row.names = F)
+
+#Reinsdorf (2009) - Pa calc 90
+#Junção das diferentes séries
+sx_REINS = consolida_series(sx_vn_1947_1989, sx_vn_1990_2000, sx_vn_1996_2018, sx_pc_2000_2017, "Sx = X/PIB")
+sm_REINS = consolida_series(sm_vn_1947_1989, sm_vn_1990_2000, sm_vn_1996_2018, sm_pc_2000_2017, "Sm = M/PIB")
+
+sx_sm_2_REINS = deflatores_soma(sx_REINS, sm_REINS, "Período", "(Sx+Sm)/2")
+sx_sm_2_REINS[,-1] = sx_sm_2_REINS[,-1]/2
+
+sx_sm_REINS = deflatores_sub(sx_REINS, sm_REINS, "Período", "(Sx-Sm)")
+pa_REINS = consolida_series(pa_calc_1947_1989, pa_vn_1990_2000, pa_vn_1996_2018, pa_pc_2000_2017, "Pa")
+px_REINS = consolida_series(px_1947_1989, px_vn_1990_2000, px_vn_1996_2018, px_pc_2000_2017, "Px")
+pa_px_REINS = deflatores_div(pa_REINS, px_REINS, "Período", "Pa/Px")
+tt_REINS = consolida_series(tt_1947_1989, tt_vn_1990_2000, tt_vn_1996_2018, tt_pc_2000_2017, "Termos de Troca (Px/Pm)")
+
+tt_1_REINS = tt_REINS
+tt_1_REINS[,-1] = tt_1_REINS[,-1] - 1
+colnames(tt_1_REINS) = c("Período", "Termos de Troca - 1")
+
+p_relativos_REINS = consolida_series(prt_pa_calc_1947_1989, p_relativos_vn_1990_2000, p_relativos_vn_1996_2018, p_relativos_pc_2000_2017, "Preços relativos (P_tradables/P_ñtradables)")
+
+p_relativos_1_REINS = p_relativos_REINS
+p_relativos_1_REINS[,-1] = p_relativos_1_REINS[,-1] - 1
+colnames(p_relativos_1_REINS[,-1]) = c("Período", "Preços relativos - 1")
+
+efeito_troca_REINS = sx_sm_2_REINS
+efeito_troca_REINS[,-1] = sx_sm_2_REINS[,-1] * pa_px_REINS[,-1] * tt_1_REINS[,-1]
+colnames(efeito_troca_REINS) = c("Período", "Efeito Termos de Troca (Reinsdorf 2009)")
+
+efeito_precos_REINS = sx_sm_REINS
+efeito_precos_REINS[,-1] = (sx_sm_REINS[,-1] * p_relativos_1_REINS[,-1])/p_relativos_REINS[,-1]
+colnames(efeito_precos_REINS) = c("Período", "Efeito Preços Relativos (Reinsdorf 2009)")
+
+tgi_menos1_REINS = deflatores_soma(efeito_troca_REINS, efeito_precos_REINS, "Período", "TGI - 1")
+
+ind_gc_var_REINS = tgi_menos1_REINS
+colnames(ind_gc_var_REINS) = c("Período", "Índice de ganhos de comércio  (Reinsdorf 2009) var% (Pa média harmônica até 1990)")
+
+tgi_REINS = tgi_menos1_REINS
+tgi_REINS[,-1] = tgi_REINS[,-1] + 1
+
+ind_gc_REINS = tgi_REINS
+ind_gc_REINS = rbind(c(1947,100), ind_gc_REINS)
+for (i in 2:dim(ind_gc_REINS)[1]){
+  ind_gc_REINS[i,2] = ind_gc_REINS[(i-1),2]*tgi_REINS[(i-1),2]
+}
+colnames(ind_gc_REINS) = c("Período", "Índice de ganhos de comércio  (Reinsdorf 2009) (Pa média harmônica até 1990)")
+
+tabela_REINS = sx_REINS
+tabela_REINS = merge(tabela_REINS, sm_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, sx_sm_2_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, sx_sm_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, pa_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, px_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, pa_px_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, tt_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, tt_1_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, p_relativos_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, p_relativos_1_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, efeito_troca_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, efeito_precos_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, tgi_menos1_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, ind_gc_var_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, tgi_REINS, by = "Período", all = T)
+tabela_REINS = merge(tabela_REINS, ind_gc_REINS, by = "Período", all = T)
+
+write.csv2(tabela_REINS,"Reinsdorf (2009) - Pa calc 90.csv", row.names = F)
