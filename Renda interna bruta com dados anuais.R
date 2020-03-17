@@ -355,6 +355,7 @@ consumo_governo_a_vcorr_2000_2017 = separar_colunas('Período', 'Consumo do Gover
 fbkf_a_vcorr_2000_2017 = separar_colunas('Período', 'Formação Bruta de Capital Fixo', tabela_ca_2000_2017_vcorr)
 export_a_vcorr_2000_2017 = separar_colunas('Período', 'Exportação', tabela_ca_2000_2017_vcorr)
 import_a_vcorr_2000_2017 = separar_colunas('Período', 'Importação', tabela_ca_2000_2017_vcorr)
+import_a_vcorr_2000_2017[,2] = import_a_vcorr_2000_2017[,2]*(-1)
 absorv_dom_a_vcorr_2000_2017 = separar_colunas('Período', 'Absorção Doméstica', tabela_ca_2000_2017_vcorr)
 
 
@@ -581,5 +582,3 @@ tabela_SNA = merge(tabela_SNA, ind_pa_calculado_SNA, by = "Período", all = T)
 tabela_SNA = merge(tabela_SNA, pa_calc_perc_SNA, by = "Período", all = T)
 
 write.csv2(tabela_SNA,"SNA 2008 - Pa calculado até 90.csv", row.names = F)
-
-#m_pa, rib, gc, gc/pib
