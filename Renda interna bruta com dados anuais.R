@@ -3,7 +3,7 @@
 
 #Definindo diretórios a serem utilizados
 getwd()
-setwd("C:\\Users\\User\\Documents\\GitHub\\rentainternabruta")
+setwd("C:/Users/User/Documents")
 
 #Carregando pacotes que serão utilizados
 library(readxl)
