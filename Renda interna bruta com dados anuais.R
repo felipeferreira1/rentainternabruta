@@ -68,7 +68,7 @@ deflatores_mult = function(fator1, fator2, nome_data, nome_dados){
   return(df_saida)
 }
 
-consolida_series = function(serie_47_89, serie_90_00, serie_96_18, serie_00_17, nome_juncao){
+consolida_series = function(serie_47_89, serie_90_00, serie_trimestral_atual, serie_anual_atual, nome_juncao){
   serie_47_89 = apply(serie_47_89,2,function(x)as.numeric(gsub(",",".",x)))
   serie_47_89 = as.data.frame(serie_47_89)
   serie_47_89 = filter(serie_47_89, Período > 1947, Período < 1991)
@@ -77,27 +77,27 @@ consolida_series = function(serie_47_89, serie_90_00, serie_96_18, serie_00_17, 
   serie_90_00 = as.data.frame(serie_90_00)
   serie_90_00 = filter(serie_90_00, Período > 1990, Período < 1997)
   
-  serie_96_18 = apply(serie_96_18,2,function(x)as.numeric(gsub(",",".",x)))
-  serie_96_18 = as.data.frame(serie_96_18)
-  serie_96_18_1 = filter(serie_96_18, Período > 1996, Período < 2001)
+  serie_trimestral_atual = apply(serie_trimestral_atual,2,function(x)as.numeric(gsub(",",".",x)))
+  serie_trimestral_atual = as.data.frame(serie_trimestral_atual)
+  serie_trimestral_atual_1 = filter(serie_trimestral_atual, Período > 1996, Período < 2001)
   
-  serie_00_17 = apply(serie_00_17,2,function(x)as.numeric(gsub(",",".",x)))
-  serie_00_17 = as.data.frame(serie_00_17)
-  serie_00_17 = filter(serie_00_17, Período > 2000, Período < 2018)
+  serie_anual_atual = apply(serie_anual_atual,2,function(x)as.numeric(gsub(",",".",x)))
+  serie_anual_atual = as.data.frame(serie_anual_atual)
+  serie_anual_atual = filter(serie_anual_atual, Período > 2000, Período < 2017)
   
-  serie_96_18_2 = filter(serie_96_18, Período > 2017)
+  serie_trimestral_atual_2 = filter(serie_trimestral_atual, Período > 2016)
   
   serie_47_89 = na.omit(serie_47_89)
   serie_90_00 = na.omit(serie_90_00)
-  serie_96_18 = na.omit(serie_96_18)
-  serie_00_17 = na.omit(serie_00_17)
-  serie_96_18_1 = na.omit(serie_96_18_1)
-  serie_96_18_2 = na.omit(serie_96_18_2)
+  serie_trimestral_atual = na.omit(serie_trimestral_atual)
+  serie_anual_atual = na.omit(serie_anual_atual)
+  serie_trimestral_atual_1 = na.omit(serie_trimestral_atual_1)
+  serie_trimestral_atual_2 = na.omit(serie_trimestral_atual_2)
   
   primeira_juncao = merge(serie_47_89, serie_90_00, by = "Período", all = T)
-  segunda_juncao = merge(primeira_juncao, serie_96_18_1, by = "Período", all = T)
-  terceira_juncao = merge(segunda_juncao, serie_00_17, by = "Período", all = T)
-  quarta_juncao = merge(terceira_juncao, serie_96_18_2, by = "Período", all = T)
+  segunda_juncao = merge(primeira_juncao, serie_trimestral_atual_1, by = "Período", all = T)
+  terceira_juncao = merge(segunda_juncao, serie_anual_atual, by = "Período", all = T)
+  quarta_juncao = merge(terceira_juncao, serie_trimestral_atual_2, by = "Período", all = T)
   
   quarta_juncao = apply(quarta_juncao,2,function(x)as.numeric(gsub(",",".",x)))
   quarta_juncao = as.data.frame(quarta_juncao)
@@ -165,7 +165,7 @@ pib_a_vcorr_1990_2000 = separar_colunas("Período", "PIB", tabela_ca_1990_2000_vc
 consumo_familias_a_vcorr_1990_2000 = separar_colunas("Período", "Consumo das Famílias", tabela_ca_1990_2000_vcorr)
 consumo_governo_a_vcorr_1990_2000 = separar_colunas("Período", "Consumo do Governo", tabela_ca_1990_2000_vcorr)
 fbkf_a_vcorr_1990_2000 = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ca_1990_2000_vcorr)
-var_est_a_vcorr_1996_2018 = separar_colunas("Período", "Variação de Estoque", tabela_ca_1990_2000_vcorr)
+var_est_a_vcorr_1990_2010 = separar_colunas("Período", "Variação de Estoque", tabela_ca_1990_2000_vcorr)
 export_a_vcorr_1990_2000 = separar_colunas("Período", "Exportação", tabela_ca_1990_2000_vcorr)
 import_a_vcorr_1990_2000 = separar_colunas("Período", "Importação", tabela_ca_1990_2000_vcorr)
 absorv_dom_a_vcorr_1990_2000 = separar_colunas("Período", "Absorção Doméstica", tabela_ca_1990_2000_vcorr)
@@ -275,241 +275,241 @@ colnames(ind_rib_pib_vn_1990_2000) = c("Período", "Índice RIB/PIB(Pa)")
 
 ######PARTE 3######
 #Carregando arquivo das contas trimestrais 1996-2018 (ref 2010)
-tabela_ct_1996_2018 = read_excel("dados.xlsx", sheet = "Trimestral_1996-2018 (ref2010)")
+tabela_ct_trimestral_atual = read_excel("dados.xlsx", sheet = "Trimestral (ref2010)")
 
 #Valores correntes
-tabela_ct_1996_2018_vcorr = arrumar_tabelas(tabela_ct_1996_2018, 2:9)
+tabela_ct_trimestral_atual_vcorr = arrumar_tabelas(tabela_ct_trimestral_atual, 2:9)
 
-pib_a_vcorr_1996_2018 = separar_colunas("Período", "PIB", tabela_ct_1996_2018_vcorr)
-consumo_familias_a_vcorr_1996_2018 = separar_colunas("Período", "Consumo das Famílias", tabela_ct_1996_2018_vcorr)
-consumo_governo_a_vcorr_1996_2018 = separar_colunas("Período", "Consumo do Governo", tabela_ct_1996_2018_vcorr)
-fbkf_a_vcorr_1996_2018 = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ct_1996_2018_vcorr)
-export_a_vcorr_1996_2018 = separar_colunas("Período", "Exportação", tabela_ct_1996_2018_vcorr)
-import_a_vcorr_1996_2018 = separar_colunas("Período", "Importação", tabela_ct_1996_2018_vcorr)
-absorv_dom_a_vcorr_1996_2018 = separar_colunas("Período", "Absorção Doméstica", tabela_ct_1996_2018_vcorr)
-var_est_a_vcorr_1996_2018 = separar_colunas("Período", "Variação de Estoques", tabela_ct_1996_2018_vcorr)
+pib_a_vcorr_trimestral_atual = separar_colunas("Período", "PIB", tabela_ct_trimestral_atual_vcorr)
+consumo_familias_a_vcorr_trimestral_atual = separar_colunas("Período", "Consumo das Famílias", tabela_ct_trimestral_atual_vcorr)
+consumo_governo_a_vcorr_trimestral_atual = separar_colunas("Período", "Consumo do Governo", tabela_ct_trimestral_atual_vcorr)
+fbkf_a_vcorr_trimestral_atual = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ct_trimestral_atual_vcorr)
+export_a_vcorr_trimestral_atual = separar_colunas("Período", "Exportação", tabela_ct_trimestral_atual_vcorr)
+import_a_vcorr_trimestral_atual = separar_colunas("Período", "Importação", tabela_ct_trimestral_atual_vcorr)
+absorv_dom_a_vcorr_trimestral_atual = separar_colunas("Período", "Absorção Doméstica", tabela_ct_trimestral_atual_vcorr)
+var_est_a_vcorr_trimestral_atual = separar_colunas("Período", "Variação de Estoques", tabela_ct_trimestral_atual_vcorr)
 
 
 #Variação real anual
-tabela_ct_1996_2018_vra = arrumar_tabelas(tabela_ct_1996_2018, 10:15)
+tabela_ct_trimestral_atual_vra = arrumar_tabelas(tabela_ct_trimestral_atual, 10:15)
 
-pib_a_vra_1996_2018 = separar_colunas("Período", "PIB", tabela_ct_1996_2018_vra)
-consumo_familias_a_vra_1996_2018 = separar_colunas("Período", "Consumo das Famílias", tabela_ct_1996_2018_vra)
-consumo_governo_a_vra_1996_2018 = separar_colunas("Período", "Consumo do Governo", tabela_ct_1996_2018_vra)
-fbkf_a_vra_1996_2018 = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ct_1996_2018_vra)
-export_a_vra_1996_2018 = separar_colunas("Período", "Exportação", tabela_ct_1996_2018_vra)
-import_a_vra_1996_2018 = separar_colunas("Período", "Importação", tabela_ct_1996_2018_vra)
+pib_a_vra_trimestral_atual = separar_colunas("Período", "PIB", tabela_ct_trimestral_atual_vra)
+consumo_familias_a_vra_trimestral_atual = separar_colunas("Período", "Consumo das Famílias", tabela_ct_trimestral_atual_vra)
+consumo_governo_a_vra_trimestral_atual = separar_colunas("Período", "Consumo do Governo", tabela_ct_trimestral_atual_vra)
+fbkf_a_vra_trimestral_atual = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ct_trimestral_atual_vra)
+export_a_vra_trimestral_atual = separar_colunas("Período", "Exportação", tabela_ct_trimestral_atual_vra)
+import_a_vra_trimestral_atual = separar_colunas("Período", "Importação", tabela_ct_trimestral_atual_vra)
 
 
 #Variação nominal anual
-pib_a_vna_1996_2018 = var_nominal(pib_a_vcorr_1996_2018)
-consumo_familias_a_vna_1996_2018 = var_nominal(consumo_familias_a_vcorr_1996_2018)
-consumo_governo_a_vna_1996_2018 = var_nominal(consumo_governo_a_vcorr_1996_2018)
-fbkf_a_vna_1996_2018 = var_nominal(fbkf_a_vcorr_1996_2018)
-export_a_vna_1996_2018 = var_nominal(export_a_vcorr_1996_2018)
-import_a_vna_1996_2018 = var_nominal(import_a_vcorr_1996_2018)
+pib_a_vna_trimestral_atual = var_nominal(pib_a_vcorr_trimestral_atual)
+consumo_familias_a_vna_trimestral_atual = var_nominal(consumo_familias_a_vcorr_trimestral_atual)
+consumo_governo_a_vna_trimestral_atual = var_nominal(consumo_governo_a_vcorr_trimestral_atual)
+fbkf_a_vna_trimestral_atual = var_nominal(fbkf_a_vcorr_trimestral_atual)
+export_a_vna_trimestral_atual = var_nominal(export_a_vcorr_trimestral_atual)
+import_a_vna_trimestral_atual = var_nominal(import_a_vcorr_trimestral_atual)
 
 
 #Calculando deflatores
-px_vn_1996_2018 = deflatores_div_cem_mais_um(export_a_vna_1996_2018, export_a_vra_1996_2018, "Período", "Px")
-pm_vn_1996_2018 = deflatores_div_cem_mais_um(import_a_vna_1996_2018, import_a_vra_1996_2018, "Período", "Pm")
-pc_vn_1996_2018 = deflatores_div_cem_mais_um(consumo_familias_a_vna_1996_2018, consumo_familias_a_vra_1996_2018, "Período", "Pc")
-pg_vn_1996_2018 = deflatores_div_cem_mais_um(consumo_governo_a_vna_1996_2018, consumo_governo_a_vra_1996_2018, "Período", "Pg")
-pfbkf_vn_1996_2018 = deflatores_div_cem_mais_um(fbkf_a_vna_1996_2018, fbkf_a_vra_1996_2018, "Período", "Pfbkf")
-pesoc_vn_1996_2018 = deflatores_div(consumo_familias_a_vcorr_1996_2018, absorv_dom_a_vcorr_1996_2018, "Período", "Peso C")
-pesog_vn_1996_2018 = deflatores_div(consumo_governo_a_vcorr_1996_2018, absorv_dom_a_vcorr_1996_2018, "Período", "Peso G")
-pesofbkf_vn_1996_2018 = deflatores_div(fbkf_a_vcorr_1996_2018, absorv_dom_a_vcorr_1996_2018, "Período", "Peso Fbkf")
+px_vn_trimestral_atual = deflatores_div_cem_mais_um(export_a_vna_trimestral_atual, export_a_vra_trimestral_atual, "Período", "Px")
+pm_vn_trimestral_atual = deflatores_div_cem_mais_um(import_a_vna_trimestral_atual, import_a_vra_trimestral_atual, "Período", "Pm")
+pc_vn_trimestral_atual = deflatores_div_cem_mais_um(consumo_familias_a_vna_trimestral_atual, consumo_familias_a_vra_trimestral_atual, "Período", "Pc")
+pg_vn_trimestral_atual = deflatores_div_cem_mais_um(consumo_governo_a_vna_trimestral_atual, consumo_governo_a_vra_trimestral_atual, "Período", "Pg")
+pfbkf_vn_trimestral_atual = deflatores_div_cem_mais_um(fbkf_a_vna_trimestral_atual, fbkf_a_vra_trimestral_atual, "Período", "Pfbkf")
+pesoc_vn_trimestral_atual = deflatores_div(consumo_familias_a_vcorr_trimestral_atual, absorv_dom_a_vcorr_trimestral_atual, "Período", "Peso C")
+pesog_vn_trimestral_atual = deflatores_div(consumo_governo_a_vcorr_trimestral_atual, absorv_dom_a_vcorr_trimestral_atual, "Período", "Peso G")
+pesofbkf_vn_trimestral_atual = deflatores_div(fbkf_a_vcorr_trimestral_atual, absorv_dom_a_vcorr_trimestral_atual, "Período", "Peso Fbkf")
 
-pa_vn_1996_2018 = 1/((pesoc_vn_1996_2018[,-1])/pc_vn_1996_2018[,-1] + (pesog_vn_1996_2018[,-1]/pg_vn_1996_2018[,-1]) + (pesofbkf_vn_1996_2018[,-1]/pfbkf_vn_1996_2018[,-1]))
-pa_vn_1996_2018 = data.frame(pesoc_vn_1996_2018[,1], pa_vn_1996_2018)
-colnames(pa_vn_1996_2018) = c("Período", "Pa")
+pa_vn_trimestral_atual = 1/((pesoc_vn_trimestral_atual[,-1])/pc_vn_trimestral_atual[,-1] + (pesog_vn_trimestral_atual[,-1]/pg_vn_trimestral_atual[,-1]) + (pesofbkf_vn_trimestral_atual[,-1]/pfbkf_vn_trimestral_atual[,-1]))
+pa_vn_trimestral_atual = data.frame(pesoc_vn_trimestral_atual[,1], pa_vn_trimestral_atual)
+colnames(pa_vn_trimestral_atual) = c("Período", "Pa")
 
-p_pib_vn_1996_2018 = deflatores_div_cem_mais_um(pib_a_vna_1996_2018, pib_a_vra_1996_2018, "Período", "Ppib")
+p_pib_vn_trimestral_atual = deflatores_div_cem_mais_um(pib_a_vna_trimestral_atual, pib_a_vra_trimestral_atual, "Período", "Ppib")
 
 #Cálculo Pa calculado
-saa_vn_1996_2018 = deflatores_div(absorv_dom_a_vcorr_1996_2018, pib_a_vcorr_1996_2018, "Período", "Saa")
-p_pib_saa_vn_1996_2018 = deflatores_mult(p_pib_vn_1996_2018, saa_vn_1996_2018, "Período", "Ppib * Saa")
-sx_vn_1996_2018 = deflatores_div(export_a_vcorr_1996_2018, pib_a_vcorr_1996_2018, "Período", "Sx")
-sm_vn_1996_2018 = deflatores_div(import_a_vcorr_1996_2018, pib_a_vcorr_1996_2018, "Período", "Sm")
+saa_vn_trimestral_atual = deflatores_div(absorv_dom_a_vcorr_trimestral_atual, pib_a_vcorr_trimestral_atual, "Período", "Saa")
+p_pib_saa_vn_trimestral_atual = deflatores_mult(p_pib_vn_trimestral_atual, saa_vn_trimestral_atual, "Período", "Ppib * Saa")
+sx_vn_trimestral_atual = deflatores_div(export_a_vcorr_trimestral_atual, pib_a_vcorr_trimestral_atual, "Período", "Sx")
+sm_vn_trimestral_atual = deflatores_div(import_a_vcorr_trimestral_atual, pib_a_vcorr_trimestral_atual, "Período", "Sm")
 
-sxpx_smpx_vn_1996_2018 = (sx_vn_1996_2018[,-1]/px_vn_1996_2018[,-1]) - (sm_vn_1996_2018[,-1]/pm_vn_1996_2018[,-1])
-sxpx_smpx_vn_1996_2018 = data.frame(sx_vn_1996_2018[,1] , sxpx_smpx_vn_1996_2018)
-colnames(sxpx_smpx_vn_1996_2018) = c("Período", " (Sx/Px - Sm/Pm)")
+sxpx_smpx_vn_trimestral_atual = (sx_vn_trimestral_atual[,-1]/px_vn_trimestral_atual[,-1]) - (sm_vn_trimestral_atual[,-1]/pm_vn_trimestral_atual[,-1])
+sxpx_smpx_vn_trimestral_atual = data.frame(sx_vn_trimestral_atual[,1] , sxpx_smpx_vn_trimestral_atual)
+colnames(sxpx_smpx_vn_trimestral_atual) = c("Período", " (Sx/Px - Sm/Pm)")
 
-pa_calc_vn_1996_2018 = p_pib_saa_vn_1996_2018[,-1] / (1 - p_pib_vn_1996_2018[,-1] * sxpx_smpx_vn_1996_2018[,-1])
-pa_calc_vn_1996_2018 = data.frame(p_pib_saa_vn_1996_2018[,1], pa_calc_vn_1996_2018)
-colnames(pa_calc_vn_1996_2018) = c("Período", "Pa calculado")
+pa_calc_vn_trimestral_atual = p_pib_saa_vn_trimestral_atual[,-1] / (1 - p_pib_vn_trimestral_atual[,-1] * sxpx_smpx_vn_trimestral_atual[,-1])
+pa_calc_vn_trimestral_atual = data.frame(p_pib_saa_vn_trimestral_atual[,1], pa_calc_vn_trimestral_atual)
+colnames(pa_calc_vn_trimestral_atual) = c("Período", "Pa calculado")
 
-p_tradables_mgeo_vn_1996_2018 = data.frame(px_vn_1996_2018$Período ,sqrt(px_vn_1996_2018$Px * pm_vn_1996_2018$Pm))
-colnames(p_tradables_mgeo_vn_1996_2018) = c("Período", "P_tradables (m.geo)")
+p_tradables_mgeo_vn_trimestral_atual = data.frame(px_vn_trimestral_atual$Período ,sqrt(px_vn_trimestral_atual$Px * pm_vn_trimestral_atual$Pm))
+colnames(p_tradables_mgeo_vn_trimestral_atual) = c("Período", "P_tradables (m.geo)")
 
-p_relativos_vn_1996_2018 = deflatores_div(p_tradables_mgeo_vn_1996_2018, pa_vn_1996_2018, "Período", "Prelativos")
-prt_pa_calc_vn_1996_2018 = deflatores_div(p_tradables_mgeo_vn_1996_2018, pa_calc_vn_1996_2018, "Período", "Prt com Pa calculado")
+p_relativos_vn_trimestral_atual = deflatores_div(p_tradables_mgeo_vn_trimestral_atual, pa_vn_trimestral_atual, "Período", "Prelativos")
+prt_pa_calc_vn_trimestral_atual = deflatores_div(p_tradables_mgeo_vn_trimestral_atual, pa_calc_vn_trimestral_atual, "Período", "Prt com Pa calculado")
 
-pib_p_ano_anterior_1996_2018 = pib_a_vcorr_1996_2018
-pib_p_ano_anterior_1996_2018[1,2] = NA
-for (i in 2:dim(pib_a_vcorr_1996_2018)[1]){
-  pib_p_ano_anterior_1996_2018[i,2] = pib_a_vcorr_1996_2018[(i-1),2] * (pib_a_vra_1996_2018[i,2]/100+1)
+pib_p_ano_anterior_trimestral_atual = pib_a_vcorr_trimestral_atual
+pib_p_ano_anterior_trimestral_atual[1,2] = NA
+for (i in 2:dim(pib_a_vcorr_trimestral_atual)[1]){
+  pib_p_ano_anterior_trimestral_atual[i,2] = pib_a_vcorr_trimestral_atual[(i-1),2] * (pib_a_vra_trimestral_atual[i,2]/100+1)
 }
 
-tt_vn_1996_2018 = deflatores_div(px_vn_1996_2018, pm_vn_1996_2018, "Período", "Termos de troca")
-x_m_vn_1996_2018 = deflatores_sub(export_a_vcorr_1996_2018, import_a_vcorr_1996_2018, "Período", "(X-M)")
-x_m_pa_vn_1996_2018 = deflatores_div(x_m_vn_1996_2018, pa_vn_1996_2018, "Período", "(X-M)/Pa")
-x_px_vn_1996_2018 = deflatores_div(export_a_vcorr_1996_2018, px_vn_1996_2018, "Período", "X/Px")
-m_pm_vn_1996_2018 = deflatores_div(import_a_vcorr_1996_2018, pm_vn_1996_2018, "Período", "M/Pm")
-xpx_mpm_vn_1996_2018 = deflatores_sub(x_px_vn_1996_2018, m_pm_vn_1996_2018, "Período", "X/Px-M/Pm")
-gc_vn_1996_2018 = deflatores_sub(x_m_pa_vn_1996_2018, xpx_mpm_vn_1996_2018, "Período", "GC")
-gc_pib_vn_1996_2018 = deflatores_div(gc_vn_1996_2018, pib_p_ano_anterior_1996_2018, "Período", "GC/PIB")
-rib_p_ano_anterior_vn_1996_2018 = deflatores_soma(gc_vn_1996_2018, pib_p_ano_anterior_1996_2018, "Período", "RIB a preços do ano anterior")
+tt_vn_trimestral_atual = deflatores_div(px_vn_trimestral_atual, pm_vn_trimestral_atual, "Período", "Termos de troca")
+x_m_vn_trimestral_atual = deflatores_sub(export_a_vcorr_trimestral_atual, import_a_vcorr_trimestral_atual, "Período", "(X-M)")
+x_m_pa_vn_trimestral_atual = deflatores_div(x_m_vn_trimestral_atual, pa_vn_trimestral_atual, "Período", "(X-M)/Pa")
+x_px_vn_trimestral_atual = deflatores_div(export_a_vcorr_trimestral_atual, px_vn_trimestral_atual, "Período", "X/Px")
+m_pm_vn_trimestral_atual = deflatores_div(import_a_vcorr_trimestral_atual, pm_vn_trimestral_atual, "Período", "M/Pm")
+xpx_mpm_vn_trimestral_atual = deflatores_sub(x_px_vn_trimestral_atual, m_pm_vn_trimestral_atual, "Período", "X/Px-M/Pm")
+gc_vn_trimestral_atual = deflatores_sub(x_m_pa_vn_trimestral_atual, xpx_mpm_vn_trimestral_atual, "Período", "GC")
+gc_pib_vn_trimestral_atual = deflatores_div(gc_vn_trimestral_atual, pib_p_ano_anterior_trimestral_atual, "Período", "GC/PIB")
+rib_p_ano_anterior_vn_trimestral_atual = deflatores_soma(gc_vn_trimestral_atual, pib_p_ano_anterior_trimestral_atual, "Período", "RIB a preços do ano anterior")
 
-var_rib_1_vn_1996_2018 = pib_a_vcorr_1996_2018
-var_rib_1_vn_1996_2018[1,2] = NA
-for (i in 2:dim(pib_a_vcorr_1996_2018)[1]){
-  var_rib_1_vn_1996_2018[i,2] = rib_p_ano_anterior_vn_1996_2018[i,-1] / pib_a_vcorr_1996_2018[(i-1),-1]
+var_rib_1_vn_trimestral_atual = pib_a_vcorr_trimestral_atual
+var_rib_1_vn_trimestral_atual[1,2] = NA
+for (i in 2:dim(pib_a_vcorr_trimestral_atual)[1]){
+  var_rib_1_vn_trimestral_atual[i,2] = rib_p_ano_anterior_vn_trimestral_atual[i,-1] / pib_a_vcorr_trimestral_atual[(i-1),-1]
 }
 
-var_rib_vn_1996_2018 = var_rib_1_vn_1996_2018
-var_rib_vn_1996_2018$PIB = var_rib_1_vn_1996_2018$PIB-1
+var_rib_vn_trimestral_atual = var_rib_1_vn_trimestral_atual
+var_rib_vn_trimestral_atual$PIB = var_rib_1_vn_trimestral_atual$PIB-1
 
-ind_pib_vn_1996_2018 = pib_a_vra_1996_2018
-ind_pib_vn_1996_2018[1,2] = 100
-for (i in 2:dim(pib_a_vra_1996_2018)[1]){
-  ind_pib_vn_1996_2018[i,2] = ind_pib_vn_1996_2018[i-1,2] * (pib_a_vra_1996_2018[i,2] / 100 + 1)
+ind_pib_vn_trimestral_atual = pib_a_vra_trimestral_atual
+ind_pib_vn_trimestral_atual[1,2] = 100
+for (i in 2:dim(pib_a_vra_trimestral_atual)[1]){
+  ind_pib_vn_trimestral_atual[i,2] = ind_pib_vn_trimestral_atual[i-1,2] * (pib_a_vra_trimestral_atual[i,2] / 100 + 1)
 }
 
-ind_rib_vn_1996_2018 = var_rib_1_vn_1996_2018
-ind_rib_vn_1996_2018[1,2] = 100
-for (i in 2:dim(var_rib_1_vn_1996_2018)[1]){
-  ind_rib_vn_1996_2018[i,2] = ind_rib_vn_1996_2018[i-1,2]*var_rib_1_vn_1996_2018[i,2]
+ind_rib_vn_trimestral_atual = var_rib_1_vn_trimestral_atual
+ind_rib_vn_trimestral_atual[1,2] = 100
+for (i in 2:dim(var_rib_1_vn_trimestral_atual)[1]){
+  ind_rib_vn_trimestral_atual[i,2] = ind_rib_vn_trimestral_atual[i-1,2]*var_rib_1_vn_trimestral_atual[i,2]
 }
 
-ind_rib_pib_vn_1996_2018 = (ind_rib_vn_1996_2018[,-1] / ind_pib_vn_1996_2018[,-1])*100
-ind_rib_pib_vn_1996_2018 = data.frame(ind_rib_vn_1996_2018[,1], ind_rib_pib_vn_1996_2018)
-colnames(ind_rib_pib_vn_1996_2018) = c("Período", "Índice RIB/PIB(Pa)")
+ind_rib_pib_vn_trimestral_atual = (ind_rib_vn_trimestral_atual[,-1] / ind_pib_vn_trimestral_atual[,-1])*100
+ind_rib_pib_vn_trimestral_atual = data.frame(ind_rib_vn_trimestral_atual[,1], ind_rib_pib_vn_trimestral_atual)
+colnames(ind_rib_pib_vn_trimestral_atual) = c("Período", "Índice RIB/PIB(Pa)")
 
 
 ######PARTE 4######
 #Carregando dados anuais 2000-2017 (ref 2010)
-tabela_ca_2000_2017= read_excel("dados.xlsx", sheet = "Anual_2000-2017 (ref2010)")
+tabela_ca_anual_atual= read_excel("dados.xlsx", sheet = "Anual (ref2010)")
 
 #valores correntes
-tabela_ca_2000_2017_vcorr = arrumar_tabelas(tabela_ca_2000_2017, 2:10)
+tabela_ca_anual_atual_vcorr = arrumar_tabelas(tabela_ca_anual_atual, 2:10)
 
-pib_a_vcorr_2000_2017 = separar_colunas("Período", "PIB", tabela_ca_2000_2017_vcorr)
-consumo_familias_a_vcorr_2000_2017 = separar_colunas("Período", "Consumo das Famílias", tabela_ca_2000_2017_vcorr)
-consumo_governo_a_vcorr_2000_2017 = separar_colunas("Período", "Consumo do Governo", tabela_ca_2000_2017_vcorr)
-fbkf_a_vcorr_2000_2017 = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ca_2000_2017_vcorr)
-export_a_vcorr_2000_2017 = separar_colunas("Período", "Exportação", tabela_ca_2000_2017_vcorr)
-import_a_vcorr_2000_2017 = separar_colunas("Período", "Importação", tabela_ca_2000_2017_vcorr)
-import_a_vcorr_2000_2017[,2] = import_a_vcorr_2000_2017[,2]*(-1)
-absorv_dom_a_vcorr_2000_2017 = separar_colunas("Período", "Absorção Doméstica", tabela_ca_2000_2017_vcorr)
+pib_a_vcorr_anual_atual = separar_colunas("Período", "PIB", tabela_ca_anual_atual_vcorr)
+consumo_familias_a_vcorr_anual_atual = separar_colunas("Período", "Consumo das Famílias", tabela_ca_anual_atual_vcorr)
+consumo_governo_a_vcorr_anual_atual = separar_colunas("Período", "Consumo do Governo", tabela_ca_anual_atual_vcorr)
+fbkf_a_vcorr_anual_atual = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ca_anual_atual_vcorr)
+export_a_vcorr_anual_atual = separar_colunas("Período", "Exportação", tabela_ca_anual_atual_vcorr)
+import_a_vcorr_anual_atual = separar_colunas("Período", "Importação", tabela_ca_anual_atual_vcorr)
+import_a_vcorr_anual_atual[,2] = import_a_vcorr_anual_atual[,2]*(-1)
+absorv_dom_a_vcorr_anual_atual = separar_colunas("Período", "Absorção Doméstica", tabela_ca_anual_atual_vcorr)
 
 
 #Valores constantes
-tabela_ca_2000_2017_vcon = arrumar_tabelas(tabela_ca_2000_2017, 11:19)
+tabela_ca_anual_atual_vcon = arrumar_tabelas(tabela_ca_anual_atual, 11:19)
 
-pib_a_vcon_2000_2017 = separar_colunas("Período", "PIB = PIB a preços do ano anterior", tabela_ca_2000_2017_vcon)
-consumo_familias_a_vcon_2000_2017 = separar_colunas("Período", "Consumo das Famílias", tabela_ca_2000_2017_vcon)
-consumo_governo_a_vcon_2000_2017 = separar_colunas("Período", "Consumo do Governo", tabela_ca_2000_2017_vcon)
-fbkf_a_vcon_2000_2017 = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ca_2000_2017_vcon)
-export_a_vcon_2000_2017 = separar_colunas("Período", "Exportação", tabela_ca_2000_2017_vcon)
-import_a_vcon_2000_2017 = separar_colunas("Período", "Importação", tabela_ca_2000_2017_vcon)
-import_a_vcon_2000_2017[,2] = import_a_vcon_2000_2017[,2]*(-1)
-absorv_dom_a_vcon_2000_2017 = separar_colunas("Período", "Absorção Doméstica", tabela_ca_2000_2017_vcon)
+pib_a_vcon_anual_atual = separar_colunas("Período", "PIB = PIB a preços do ano anterior", tabela_ca_anual_atual_vcon)
+consumo_familias_a_vcon_anual_atual = separar_colunas("Período", "Consumo das Famílias", tabela_ca_anual_atual_vcon)
+consumo_governo_a_vcon_anual_atual = separar_colunas("Período", "Consumo do Governo", tabela_ca_anual_atual_vcon)
+fbkf_a_vcon_anual_atual = separar_colunas("Período", "Formação Bruta de Capital Fixo", tabela_ca_anual_atual_vcon)
+export_a_vcon_anual_atual = separar_colunas("Período", "Exportação", tabela_ca_anual_atual_vcon)
+import_a_vcon_anual_atual = separar_colunas("Período", "Importação", tabela_ca_anual_atual_vcon)
+import_a_vcon_anual_atual[,2] = import_a_vcon_anual_atual[,2]*(-1)
+absorv_dom_a_vcon_anual_atual = separar_colunas("Período", "Absorção Doméstica", tabela_ca_anual_atual_vcon)
 
 
 #Deflatores com valores constantes
-px_pc_2000_2017 = deflatores_div(export_a_vcorr_2000_2017, export_a_vcon_2000_2017, "Período", "Px")
-pm_pc_2000_2017 = deflatores_div(import_a_vcorr_2000_2017, import_a_vcon_2000_2017, "Período", "Pm")
-pa_pc_2000_2017 = deflatores_div(absorv_dom_a_vcorr_2000_2017, absorv_dom_a_vcon_2000_2017, "Período", "Pa")
-p_pib_pc_2000_2017 = deflatores_div(pib_a_vcorr_2000_2017, pib_a_vcon_2000_2017, "Período", "Ppib")
+px_pc_anual_atual = deflatores_div(export_a_vcorr_anual_atual, export_a_vcon_anual_atual, "Período", "Px")
+pm_pc_anual_atual = deflatores_div(import_a_vcorr_anual_atual, import_a_vcon_anual_atual, "Período", "Pm")
+pa_pc_anual_atual = deflatores_div(absorv_dom_a_vcorr_anual_atual, absorv_dom_a_vcon_anual_atual, "Período", "Pa")
+p_pib_pc_anual_atual = deflatores_div(pib_a_vcorr_anual_atual, pib_a_vcon_anual_atual, "Período", "Ppib")
 
 #Cálculo Pa calculado
-saa_pc_2000_2017 = deflatores_div(absorv_dom_a_vcorr_2000_2017, pib_a_vcorr_2000_2017, "Período", "Saa")
-p_pib_saa_pc_2000_2017 = deflatores_mult(p_pib_pc_2000_2017, saa_pc_2000_2017, "Período", "Ppib * Saa")
-sx_pc_2000_2017 = deflatores_div(export_a_vcorr_2000_2017, pib_a_vcorr_2000_2017, "Período", "Sx")
+saa_pc_anual_atual = deflatores_div(absorv_dom_a_vcorr_anual_atual, pib_a_vcorr_anual_atual, "Período", "Saa")
+p_pib_saa_pc_anual_atual = deflatores_mult(p_pib_pc_anual_atual, saa_pc_anual_atual, "Período", "Ppib * Saa")
+sx_pc_anual_atual = deflatores_div(export_a_vcorr_anual_atual, pib_a_vcorr_anual_atual, "Período", "Sx")
 
-sm_pc_2000_2017 = import_a_vcorr_2000_2017[,-1] / pib_a_vcorr_2000_2017[,-1]
-sm_pc_2000_2017 = data.frame(import_a_vcorr_2000_2017[,1], sm_pc_2000_2017)
-colnames(sm_pc_2000_2017) = c("Período", "Sm")
+sm_pc_anual_atual = import_a_vcorr_anual_atual[,-1] / pib_a_vcorr_anual_atual[,-1]
+sm_pc_anual_atual = data.frame(import_a_vcorr_anual_atual[,1], sm_pc_anual_atual)
+colnames(sm_pc_anual_atual) = c("Período", "Sm")
 
-sxpx_smpx_pc_2000_2017 = (sx_pc_2000_2017[,-1]/px_pc_2000_2017[,-1]) - (sm_pc_2000_2017[,-1]/pm_pc_2000_2017[,-1])
-sxpx_smpx_pc_2000_2017 = data.frame(sx_pc_2000_2017[,1] , sxpx_smpx_pc_2000_2017)
-colnames(sxpx_smpx_pc_2000_2017) = c("Período", " (Sx/Px - Sm/Pm)")
+sxpx_smpx_pc_anual_atual = (sx_pc_anual_atual[,-1]/px_pc_anual_atual[,-1]) - (sm_pc_anual_atual[,-1]/pm_pc_anual_atual[,-1])
+sxpx_smpx_pc_anual_atual = data.frame(sx_pc_anual_atual[,1] , sxpx_smpx_pc_anual_atual)
+colnames(sxpx_smpx_pc_anual_atual) = c("Período", " (Sx/Px - Sm/Pm)")
 
-pa_calc_pc_2000_2017 = p_pib_saa_pc_2000_2017[,-1] / (1 - p_pib_pc_2000_2017[,-1] * sxpx_smpx_pc_2000_2017[,-1])
-pa_calc_pc_2000_2017 = data.frame(p_pib_saa_pc_2000_2017[,1], pa_calc_pc_2000_2017)
-colnames(pa_calc_pc_2000_2017) = c("Período", "Pa calculado")
+pa_calc_pc_anual_atual = p_pib_saa_pc_anual_atual[,-1] / (1 - p_pib_pc_anual_atual[,-1] * sxpx_smpx_pc_anual_atual[,-1])
+pa_calc_pc_anual_atual = data.frame(p_pib_saa_pc_anual_atual[,1], pa_calc_pc_anual_atual)
+colnames(pa_calc_pc_anual_atual) = c("Período", "Pa calculado")
 
-p_tradables_mgeo_pc_2000_2017 = data.frame(px_pc_2000_2017$Período ,sqrt(px_pc_2000_2017$Px * pm_pc_2000_2017$Pm))
-colnames(p_tradables_mgeo_pc_2000_2017) = c("Período", "P_tradables (m.geo)")
+p_tradables_mgeo_pc_anual_atual = data.frame(px_pc_anual_atual$Período ,sqrt(px_pc_anual_atual$Px * pm_pc_anual_atual$Pm))
+colnames(p_tradables_mgeo_pc_anual_atual) = c("Período", "P_tradables (m.geo)")
 
-p_relativos_pc_2000_2017 = deflatores_div(p_tradables_mgeo_pc_2000_2017, pa_pc_2000_2017, "Período", "Prelativos")
-prt_pa_calc_pc_2000_2017 = deflatores_div(p_tradables_mgeo_pc_2000_2017, pa_calc_pc_2000_2017, "Período", "Prt com Pa calculado")
+p_relativos_pc_anual_atual = deflatores_div(p_tradables_mgeo_pc_anual_atual, pa_pc_anual_atual, "Período", "Prelativos")
+prt_pa_calc_pc_anual_atual = deflatores_div(p_tradables_mgeo_pc_anual_atual, pa_calc_pc_anual_atual, "Período", "Prt com Pa calculado")
 
-var_pib_1_pc_2000_2017 = pib_a_vcorr_2000_2017
-for (i in 2:dim(pib_a_vcorr_2000_2017)[1]){
-  var_pib_1_pc_2000_2017[i,2] = pib_a_vcon_2000_2017[i,-1] / pib_a_vcorr_2000_2017[i-1,-1]
+var_pib_1_pc_anual_atual = pib_a_vcorr_anual_atual
+for (i in 2:dim(pib_a_vcorr_anual_atual)[1]){
+  var_pib_1_pc_anual_atual[i,2] = pib_a_vcon_anual_atual[i,-1] / pib_a_vcorr_anual_atual[i-1,-1]
 }
 
-var_pib_pc_2000_2017 = data.frame(Período = var_pib_1_pc_2000_2017$Período, Var = (var_pib_1_pc_2000_2017$PIB-1)*100)
+var_pib_pc_anual_atual = data.frame(Período = var_pib_1_pc_anual_atual$Período, Var = (var_pib_1_pc_anual_atual$PIB-1)*100)
 
-tt_pc_2000_2017 = deflatores_div(px_pc_2000_2017, pm_pc_2000_2017, "Período", "Termos de troca")
-x_m_pc_2000_2017 = deflatores_sub(export_a_vcorr_2000_2017, import_a_vcorr_2000_2017, "Período", "(X-M)")
-x_m_pa_pc_2000_2017 = deflatores_div(x_m_pc_2000_2017, pa_pc_2000_2017, "Período", "(X-M)/Pa")
-x_px_pc_2000_2017 = deflatores_div(export_a_vcorr_2000_2017, px_pc_2000_2017, "Período", "X/Px")
+tt_pc_anual_atual = deflatores_div(px_pc_anual_atual, pm_pc_anual_atual, "Período", "Termos de troca")
+x_m_pc_anual_atual = deflatores_sub(export_a_vcorr_anual_atual, import_a_vcorr_anual_atual, "Período", "(X-M)")
+x_m_pa_pc_anual_atual = deflatores_div(x_m_pc_anual_atual, pa_pc_anual_atual, "Período", "(X-M)/Pa")
+x_px_pc_anual_atual = deflatores_div(export_a_vcorr_anual_atual, px_pc_anual_atual, "Período", "X/Px")
 
-m_pm_pc_2000_2017 = import_a_vcorr_2000_2017[,-1] / pm_pc_2000_2017[,-1]
-m_pm_pc_2000_2017 = data.frame(import_a_vcorr_2000_2017[,1], m_pm_pc_2000_2017)
-colnames(m_pm_pc_2000_2017) = c("Período", "M/Pm")
+m_pm_pc_anual_atual = import_a_vcorr_anual_atual[,-1] / pm_pc_anual_atual[,-1]
+m_pm_pc_anual_atual = data.frame(import_a_vcorr_anual_atual[,1], m_pm_pc_anual_atual)
+colnames(m_pm_pc_anual_atual) = c("Período", "M/Pm")
 
-xpx_mpm_pc_2000_2017 = deflatores_sub(x_px_pc_2000_2017, m_pm_pc_2000_2017, "Período", "X/Px-M/Pm")
-gc_pc_2000_2017 = deflatores_sub(x_m_pa_pc_2000_2017, xpx_mpm_pc_2000_2017, "Período", "GC")
-gc_pib_pc_2000_2017 = deflatores_div(gc_pc_2000_2017, pib_a_vcon_2000_2017, "Período", "GC/PIB")
-rib_p_ano_anterior_pc_2000_2017 = deflatores_soma(gc_pc_2000_2017, pib_a_vcon_2000_2017, "Período", "RIB a preços do ano anterior")
+xpx_mpm_pc_anual_atual = deflatores_sub(x_px_pc_anual_atual, m_pm_pc_anual_atual, "Período", "X/Px-M/Pm")
+gc_pc_anual_atual = deflatores_sub(x_m_pa_pc_anual_atual, xpx_mpm_pc_anual_atual, "Período", "GC")
+gc_pib_pc_anual_atual = deflatores_div(gc_pc_anual_atual, pib_a_vcon_anual_atual, "Período", "GC/PIB")
+rib_p_ano_anterior_pc_anual_atual = deflatores_soma(gc_pc_anual_atual, pib_a_vcon_anual_atual, "Período", "RIB a preços do ano anterior")
 
-var_rib_1_pc_2000_2017 = pib_a_vcorr_2000_2017
-for (i in 2:dim(pib_a_vcorr_2000_2017)[1]){
-  var_rib_1_pc_2000_2017[i,2] = rib_p_ano_anterior_pc_2000_2017[i,-1] / pib_a_vcorr_2000_2017[i-1,-1]
+var_rib_1_pc_anual_atual = pib_a_vcorr_anual_atual
+for (i in 2:dim(pib_a_vcorr_anual_atual)[1]){
+  var_rib_1_pc_anual_atual[i,2] = rib_p_ano_anterior_pc_anual_atual[i,-1] / pib_a_vcorr_anual_atual[i-1,-1]
 }
 
-var_rib_pc_2000_2017 = var_rib_1_pc_2000_2017
-var_rib_pc_2000_2017$PIB = var_rib_pc_2000_2017$PIB-1
+var_rib_pc_anual_atual = var_rib_1_pc_anual_atual
+var_rib_pc_anual_atual$PIB = var_rib_pc_anual_atual$PIB-1
 
-ind_pib_pc_2000_2017 = var_pib_1_pc_2000_2017
-for (i in 2:dim(var_pib_1_pc_2000_2017)[1]){
-  ind_pib_pc_2000_2017[1,2] = 100
-  ind_pib_pc_2000_2017[i,2] = ind_pib_pc_2000_2017[i-1,2]*var_pib_1_pc_2000_2017[i,2]
+ind_pib_pc_anual_atual = var_pib_1_pc_anual_atual
+for (i in 2:dim(var_pib_1_pc_anual_atual)[1]){
+  ind_pib_pc_anual_atual[1,2] = 100
+  ind_pib_pc_anual_atual[i,2] = ind_pib_pc_anual_atual[i-1,2]*var_pib_1_pc_anual_atual[i,2]
 }
 
-ind_rib_pc_2000_2017 = var_rib_1_pc_2000_2017
-for (i in 2:dim(var_rib_1_pc_2000_2017)[1]){
-  ind_rib_pc_2000_2017[1,2] = 100
-  ind_rib_pc_2000_2017[i,2] = ind_rib_pc_2000_2017[i-1,2]*var_rib_1_pc_2000_2017[i,2]
+ind_rib_pc_anual_atual = var_rib_1_pc_anual_atual
+for (i in 2:dim(var_rib_1_pc_anual_atual)[1]){
+  ind_rib_pc_anual_atual[1,2] = 100
+  ind_rib_pc_anual_atual[i,2] = ind_rib_pc_anual_atual[i-1,2]*var_rib_1_pc_anual_atual[i,2]
 }
 
-ind_rib_pib_pc_2000_2017 = (ind_rib_pc_2000_2017[,-1] / ind_pib_pc_2000_2017[,-1])*100
-ind_rib_pib_pc_2000_2017 = data.frame(ind_rib_pc_2000_2017[,1], ind_rib_pib_pc_2000_2017)
+ind_rib_pib_pc_anual_atual = (ind_rib_pc_anual_atual[,-1] / ind_pib_pc_anual_atual[,-1])*100
+ind_rib_pib_pc_anual_atual = data.frame(ind_rib_pc_anual_atual[,1], ind_rib_pib_pc_anual_atual)
 
 
 #SNA (2008)
 #Junção das diferentes séries
-p_pib_SNA = consolida_series(p_pib_1947_1989, p_pib_vn_1990_2000, p_pib_vn_1996_2018, p_pib_pc_2000_2017, "Deflator do PIB")
-pib_p_SNA = consolida_series(pib_p_ano_anterior_1947_1989, pib_p_ano_anterior_1990_2000, pib_p_ano_anterior_1996_2018, pib_a_vcon_2000_2017, "PIBreal (PIB a preços do ano anterior)")
-x_px_SNA = consolida_series(x_px_1947_1989, x_px_vn_1990_2000, x_px_vn_1996_2018, x_px_pc_2000_2017, "{- (X/Px)}")
-m_pm_SNA = consolida_series(m_pm_1947_1989, m_pm_vn_1990_2000, m_pm_vn_1996_2018, m_pm_pc_2000_2017, "{+ (M/Pm)}")
+p_pib_SNA = consolida_series(p_pib_1947_1989, p_pib_vn_1990_2000, p_pib_vn_trimestral_atual, p_pib_pc_anual_atual, "Deflator do PIB")
+pib_p_SNA = consolida_series(pib_p_ano_anterior_1947_1989, pib_p_ano_anterior_1990_2000, pib_p_ano_anterior_trimestral_atual, pib_a_vcon_anual_atual, "PIBreal (PIB a preços do ano anterior)")
+x_px_SNA = consolida_series(x_px_1947_1989, x_px_vn_1990_2000, x_px_vn_trimestral_atual, x_px_pc_anual_atual, "{- (X/Px)}")
+m_pm_SNA = consolida_series(m_pm_1947_1989, m_pm_vn_1990_2000, m_pm_vn_trimestral_atual, m_pm_pc_anual_atual, "{+ (M/Pm)}")
 
 absorv_dom_SNA = pib_p_SNA[,-1] - x_px_SNA[,-1] + m_pm_SNA[,-1]
 absorv_dom_SNA = data.frame(pib_p_SNA[,1], absorv_dom_SNA)
 colnames(absorv_dom_SNA) = c("Período", "(= Absorção Interna)")
 
-export_SNA = consolida_series(export_a_vcorr_1947_1989, export_a_vcorr_1990_2000, export_a_vcorr_1996_2018, export_a_vcorr_2000_2017, "Exportações")
-pa_SNA = consolida_series(pa_calc_1947_1989, pa_vn_1990_2000, pa_vn_1996_2018, pa_pc_2000_2017, "Pa")
+export_SNA = consolida_series(export_a_vcorr_1947_1989, export_a_vcorr_1990_2000, export_a_vcorr_trimestral_atual, export_a_vcorr_anual_atual, "Exportações")
+pa_SNA = consolida_series(pa_calc_1947_1989, pa_vn_1990_2000, pa_vn_trimestral_atual, pa_pc_anual_atual, "Pa")
 x_pa_SNA = export_SNA[,-1] / pa_SNA[,-1]
 x_pa_SNA = data.frame(export_SNA[,1], x_pa_SNA)
 colnames(x_pa_SNA) = c("Período", "{+ (X/Pa)}")
 
-import_SNA = consolida_series(import_a_vcorr_1947_1989, import_a_vcorr_1990_2000, import_a_vcorr_1996_2018, import_a_vcorr_2000_2017, "Importações")
+import_SNA = consolida_series(import_a_vcorr_1947_1989, import_a_vcorr_1990_2000, import_a_vcorr_trimestral_atual, import_a_vcorr_anual_atual, "Importações")
 m_pa_SNA = import_SNA[,-1] / pa_SNA[,-1]
 m_pa_SNA = data.frame(import_SNA[,1], m_pa_SNA)
 colnames(m_pa_SNA) = c("Período", "{- (M/Pa)}")
@@ -521,14 +521,14 @@ colnames(rib_SNA) = c("Período", "(= RIBreal)")
 gc_SNA = deflatores_sub(rib_SNA, pib_p_SNA, "Período","GC")
 gc_pib_SNA = deflatores_div(gc_SNA, pib_p_SNA, "Período", "GC/PIB")
 
-var_pib_SNA = consolida_series(var_pib_pc_1947_1989, pib_a_vra_1990_2000, pib_a_vra_1996_2018, var_pib_pc_2000_2017, "Var. Real (%) PIB")
+var_pib_SNA = consolida_series(var_pib_pc_1947_1989, pib_a_vra_1990_2000, pib_a_vra_trimestral_atual, var_pib_pc_anual_atual, "Var. Real (%) PIB")
 var_pib_SNA$`Var. Real (%) PIB` = var_pib_SNA$`Var. Real (%) PIB`/100
-var_rib_SNA = consolida_series(var_rib_pc_1947_1989, var_rib_vn_1990_2000, var_rib_vn_1996_2018, var_rib_pc_2000_2017, "Var. Real (%) RIB")
+var_rib_SNA = consolida_series(var_rib_pc_1947_1989, var_rib_vn_1990_2000, var_rib_vn_trimestral_atual, var_rib_pc_anual_atual, "Var. Real (%) RIB")
 
 gc_porc_pib_SNA = deflatores_sub(var_rib_SNA, var_pib_SNA, "Período", "GC(%) do PIB")
 
-px_SNA = consolida_series(px_1947_1989, px_vn_1990_2000, px_vn_1996_2018, px_pc_2000_2017, "Px")
-pm_SNA = consolida_series(pm_1947_1989, pm_vn_1990_2000, pm_vn_1996_2018, pm_pc_2000_2017, "Pm")
+px_SNA = consolida_series(px_1947_1989, px_vn_1990_2000, px_vn_trimestral_atual, px_pc_anual_atual, "Px")
+pm_SNA = consolida_series(pm_1947_1989, pm_vn_1990_2000, pm_vn_trimestral_atual, pm_pc_anual_atual, "Pm")
 tt_SNA = deflatores_div(px_SNA, pm_SNA, "Período", "Termos de Troca")
 
 ind_pib_SNA = var_pib_SNA
@@ -582,23 +582,23 @@ write.csv2(tabela_SNA,"SNA 2008 - Pa calculado até 90.csv", row.names = F)
 
 #Reinsdorf (2009) - Pa calc 90
 #Junção das diferentes séries
-sx_REINS = consolida_series(sx_vn_1947_1989, sx_vn_1990_2000, sx_vn_1996_2018, sx_pc_2000_2017, "Sx = X/PIB")
-sm_REINS = consolida_series(sm_vn_1947_1989, sm_vn_1990_2000, sm_vn_1996_2018, sm_pc_2000_2017, "Sm = M/PIB")
+sx_REINS = consolida_series(sx_vn_1947_1989, sx_vn_1990_2000, sx_vn_trimestral_atual, sx_pc_anual_atual, "Sx = X/PIB")
+sm_REINS = consolida_series(sm_vn_1947_1989, sm_vn_1990_2000, sm_vn_trimestral_atual, sm_pc_anual_atual, "Sm = M/PIB")
 
 sx_sm_2_REINS = deflatores_soma(sx_REINS, sm_REINS, "Período", "(Sx+Sm)/2")
 sx_sm_2_REINS[,-1] = sx_sm_2_REINS[,-1]/2
 
 sx_sm_REINS = deflatores_sub(sx_REINS, sm_REINS, "Período", "(Sx-Sm)")
-pa_REINS = consolida_series(pa_calc_1947_1989, pa_vn_1990_2000, pa_vn_1996_2018, pa_pc_2000_2017, "Pa")
-px_REINS = consolida_series(px_1947_1989, px_vn_1990_2000, px_vn_1996_2018, px_pc_2000_2017, "Px")
+pa_REINS = consolida_series(pa_calc_1947_1989, pa_vn_1990_2000, pa_vn_trimestral_atual, pa_pc_anual_atual, "Pa")
+px_REINS = consolida_series(px_1947_1989, px_vn_1990_2000, px_vn_trimestral_atual, px_pc_anual_atual, "Px")
 pa_px_REINS = deflatores_div(pa_REINS, px_REINS, "Período", "Pa/Px")
-tt_REINS = consolida_series(tt_1947_1989, tt_vn_1990_2000, tt_vn_1996_2018, tt_pc_2000_2017, "Termos de Troca (Px/Pm)")
+tt_REINS = consolida_series(tt_1947_1989, tt_vn_1990_2000, tt_vn_trimestral_atual, tt_pc_anual_atual, "Termos de Troca (Px/Pm)")
 
 tt_1_REINS = tt_REINS
 tt_1_REINS[,-1] = tt_1_REINS[,-1] - 1
 colnames(tt_1_REINS) = c("Período", "Termos de Troca - 1")
 
-p_relativos_REINS = consolida_series(prt_pa_calc_1947_1989, p_relativos_vn_1990_2000, p_relativos_vn_1996_2018, p_relativos_pc_2000_2017, "Preços relativos (P_tradables/P_ñtradables)")
+p_relativos_REINS = consolida_series(prt_pa_calc_1947_1989, p_relativos_vn_1990_2000, p_relativos_vn_trimestral_atual, p_relativos_pc_anual_atual, "Preços relativos (P_tradables/P_ñtradables)")
 
 p_relativos_1_REINS = p_relativos_REINS
 p_relativos_1_REINS[,-1] = p_relativos_1_REINS[,-1] - 1
