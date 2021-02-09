@@ -1,6 +1,12 @@
 #Rotina para calcular a renda interna bruta
 #Feito por: Felipe Simplício Ferreira
 
+
+### AJEITAR DATAS PARA CONSOLIDAÇÃO DAS SÉRIES DE ACORDO COM A DISPONIBILIDADE ###
+ano_de_corte = 2019
+# Para mudar quantidade de casas decimais a serem consideradas
+options(digits = 22)
+
 #Definindo diretórios a serem utilizados
 getwd()
 setwd("C:/Users/User/Documents")
@@ -83,9 +89,9 @@ consolida_series = function(serie_47_89, serie_90_00, serie_trimestral_atual, se
   
   serie_anual_atual = apply(serie_anual_atual,2,function(x)as.numeric(gsub(",",".",x)))
   serie_anual_atual = as.data.frame(serie_anual_atual)
-  serie_anual_atual = filter(serie_anual_atual, Período > 2000, Período < 2017)
+  serie_anual_atual = filter(serie_anual_atual, Período > 2000, Período < ano_de_corte)
   
-  serie_trimestral_atual_2 = filter(serie_trimestral_atual, Período > 2016)
+  serie_trimestral_atual_2 = filter(serie_trimestral_atual, Período > ano_de_corte - 1)
   
   serie_47_89 = na.omit(serie_47_89)
   serie_90_00 = na.omit(serie_90_00)
