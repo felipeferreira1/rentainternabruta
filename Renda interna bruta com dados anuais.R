@@ -3,13 +3,13 @@
 
 
 ### AJEITAR DATAS PARA CONSOLIDAÇÃO DAS SÉRIES DE ACORDO COM A DISPONIBILIDADE ###
-ano_de_corte = 2019
+ano_de_corte = 2020
 # Para mudar quantidade de casas decimais a serem consideradas
 options(digits = 22)
 
 #Definindo diretórios a serem utilizados
 getwd()
-setwd("C:/Users/User/Documents")
+# setwd("C:/Users/User/Documents")
 
 #Carregando pacotes que serão utilizados
 library(readxl)
